@@ -1,12 +1,36 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './components/App.jsx'
-import './index.css'
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import App from './components/layout/App.jsx'
+import ErrorPage from './components/page/ErrorPage.jsx'
+import IndexPage from './components/page/IndexPage.jsx'
+import RoomPage from './components/page/RoomPage.jsx'
+import CreateRoomPage from './components/page/CreateRoomPage.jsx';
 
-ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-).render(
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        index: true,
+        element: <IndexPage />
+      },
+      {
+        path: "rooms",
+        element: <CreateRoomPage />        
+      },
+      {
+        path: "rooms/:roomId",
+        element: <RoomPage />        
+      },
+    ]
+  }
+]);
+
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-)
+    <RouterProvider router={router} />
+  </React.StrictMode>
+);

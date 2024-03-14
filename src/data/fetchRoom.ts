@@ -1,4 +1,5 @@
-import { fetchMany, fetchPost } from "./fetchAny";
+import { fetchMany, fetchGet, fetchPost, fetchError } from "./fetchAny";
+import { Room } from "../types/apiData";
 
 
 export async function getManyRooms(
@@ -6,14 +7,32 @@ export async function getManyRooms(
     order='asc', 
     limit=10, 
     offset=0
-): Promise<Object | boolean> {
-    return await fetchMany(
+): Promise<Room[]> {
+    const json = await fetchMany(
         '/rooms',
         orderBy, 
         order, 
         limit, 
         offset
     )
+
+    if ('room_collection' in json) {
+        return json.room_collection as Room[]
+    }
+    
+    throw fetchError(json)
+}
+
+export async function getRoom(
+    roomId: string
+): Promise<Room> {
+    const json = await fetchGet('/rooms', roomId)
+
+    if ('room' in json) {
+        return json.room as Room
+    }
+    
+    throw fetchError(json)
 }
 
 type RoomBody = {
@@ -23,9 +42,15 @@ type RoomBody = {
 
 export async function postRoom(
     body: RoomBody
-): Promise<Object | boolean> {
-    return await fetchPost(
+): Promise<null> {
+    const json = await fetchPost(
         '/rooms',
         body
     )
+
+    if (json === null) {
+        return null
+    }
+
+    throw fetchError(json)
 }

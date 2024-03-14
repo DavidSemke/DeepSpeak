@@ -1,4 +1,5 @@
-import { fetchMany, fetchPost } from "./fetchAny";
+import { fetchError, fetchMany, fetchPost } from "./fetchAny";
+import { Message } from "../types/apiData";
 
 
 export async function getManyMessages(
@@ -7,27 +8,38 @@ export async function getManyMessages(
     order='asc', 
     limit=10, 
     offset=0
-): Promise<Object | boolean> {
-    return await fetchMany(
+): Promise<Message[]> {
+    const json = await fetchMany(
         `/rooms/${roomId}/messages`,
         orderBy, 
         order, 
         limit, 
         offset
     )
+
+    if ('message_collection' in json) {
+        return json.message_collection as Message[]
+    }
+    
+    throw fetchError(json)
 }
 
 type MessageBody = {
-    content: string,
-    user: string
+    content: string
 }
 
 export async function postMessage(
     roomId: string,
     body: MessageBody
-): Promise<Object | boolean> {
-    return await fetchPost(
+): Promise<null> {
+    const json = await fetchPost(
         `/rooms/${roomId}/messages`,
         body
     )
+
+    if (json === null) {
+        return null
+    }
+    
+    throw fetchError(json)
 }

@@ -6,7 +6,7 @@ export async function fetchMany(
     order='asc', 
     limit=10, 
     offset=0
-): Promise<Object | boolean> {
+): Promise<Object> {
     const url = `${baseUrl}${pathToCollection}?`
         + `order-by=${orderBy}`
         + `&order=${order}`
@@ -14,20 +14,26 @@ export async function fetchMany(
         + `&offset=${offset}` 
 
     const res = await fetch(url, { mode: "cors" });
+    
+    return await res.json(); 
+}
 
-    // json is returned in all cases
-    try {
-        return await res.json();
-    } 
-    catch (error) {
-        return false;
-    }
+export async function fetchGet(
+    pathToCollection: string, 
+    documentId: string
+): Promise<Object> {
+    const res = await fetch(
+        `${baseUrl}${pathToCollection}/${documentId}`, 
+        { mode: "cors" }
+    );
+
+    return await res.json();
 }
 
 export async function fetchPost(
     pathToCollection: string, 
     body: Object
-): Promise<Object | boolean> {
+): Promise<Object | null> {
     const res = await fetch(
         `${baseUrl}${pathToCollection}`, 
         { 
@@ -37,23 +43,23 @@ export async function fetchPost(
         }
     );
 
-    // api does not return json on success
-    if (res.ok) {
-        return true
-    }
+    // Res might include json
+    const contentType = res.headers.get('content-type');
 
-    try {
+    if (
+        contentType 
+        && contentType.includes('application/json')
+    ) {
         return await res.json();
-    } 
-    catch (error) {
-        return false;
     }
+    
+    return null
 }
 
 export async function fetchDelete(
     pathToCollection: string, 
     user: string
-): Promise<Object | boolean> {
+): Promise<Object | null> {
     const res = await fetch(
         `${baseUrl}${pathToCollection}/${user}`,
         { 
@@ -62,15 +68,27 @@ export async function fetchDelete(
         }
     );
 
-    // api does not return json on success
-    if (res.ok) {
-        return true
+    // Res might include json
+    const contentType = res.headers.get('content-type');
+
+    if (
+        contentType 
+        && contentType.includes('application/json')
+    ) {
+        return await res.json();
+    }
+    
+    return null
+}
+
+export function fetchError(json: Object): Error {
+    if (
+        'errors' in json
+        && Array.isArray(json.errors)
+        && 'message' in json.errors[0]
+    ) {
+        return new Error(json.errors[0].message)
     }
 
-    try {
-        return await res.json();
-    } 
-    catch (error) {
-        return false;
-    }
+    return new Error('Error receiving JSON')
 }
