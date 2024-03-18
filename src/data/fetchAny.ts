@@ -32,39 +32,33 @@ export async function fetchGet(
 
 export async function fetchPost(
     pathToCollection: string, 
-    body: Object
-): Promise<Object | null> {
+    body: FormData,
+    headers: { [key: string]: string } = {}
+): Promise<Object> {
     const res = await fetch(
         `${baseUrl}${pathToCollection}`, 
         { 
             mode: "cors",
             method: 'POST',
-            body: JSON.stringify(body)
+            body,
+            headers
         }
     );
 
-    // Res might include json
-    const contentType = res.headers.get('content-type');
-
-    if (
-        contentType 
-        && contentType.includes('application/json')
-    ) {
-        return await res.json();
-    }
-    
-    return null
+    return await res.json();
 }
 
 export async function fetchDelete(
     pathToCollection: string, 
-    user: string
+    user: string,
+    headers: { [key: string]: string } = {}
 ): Promise<Object | null> {
     const res = await fetch(
         `${baseUrl}${pathToCollection}/${user}`,
         { 
             mode: "cors",
             method: 'DELETE',
+            headers
         }
     );
 

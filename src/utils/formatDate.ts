@@ -20,3 +20,14 @@ export function timeUntil(date: Date, expiryDate: Date): string {
 
     return '< 1m'
 }
+
+export function wordTimestamp(date: Date) {
+    return date.toLocaleDateString(
+        'default', 
+        { 
+            weekday: 'short', 
+            month: 'short',
+            day: 'numeric'
+        }
+    )
+}

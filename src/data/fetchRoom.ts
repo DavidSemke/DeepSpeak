@@ -1,11 +1,11 @@
 import { fetchMany, fetchGet, fetchPost, fetchError } from "./fetchAny";
-import { Room } from "../types/apiData";
+import type { Room } from "../types/api";
 
 
 export async function getManyRooms(
     orderBy='topic', 
     order='asc', 
-    limit=10, 
+    limit=12, 
     offset=0
 ): Promise<Room[]> {
     const json = await fetchMany(
@@ -35,21 +35,16 @@ export async function getRoom(
     throw fetchError(json)
 }
 
-type RoomBody = {
-    topic: string,
-    'max-user-count': number
-}
-
 export async function postRoom(
-    body: RoomBody
-): Promise<null> {
+    body: FormData
+): Promise<Room> {
     const json = await fetchPost(
         '/rooms',
         body
     )
 
-    if (json === null) {
-        return null
+    if ('room' in json) {
+        return json.room as Room
     }
 
     throw fetchError(json)

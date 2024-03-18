@@ -1,11 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import App from './components/layout/App.jsx'
 import ErrorPage from './components/page/ErrorPage.jsx'
 import IndexPage from './components/page/IndexPage.jsx'
 import RoomPage from './components/page/RoomPage.jsx'
-import CreateRoomPage from './components/page/CreateRoomPage.jsx';
+import CreateRoomPage from './components/page/CreateRoomPage.jsx'
 
 const router = createBrowserRouter([
   {
@@ -18,7 +18,7 @@ const router = createBrowserRouter([
         element: <IndexPage />
       },
       {
-        path: "rooms",
+        path: "rooms/create-room",
         element: <CreateRoomPage />        
       },
       {

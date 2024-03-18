@@ -1,21 +1,27 @@
+import Cookies from "js-cookie";
+import { JwtDict } from "../types/cookie";
 import { fetchPost, fetchDelete, fetchError } from "./fetchAny";
 
 
-type UserBody = {
-    user: string
-}
-
 export async function postUser(
     roomId: string,
-    body: UserBody
-): Promise<string> {
+    body: FormData
+): Promise<void> {
     const json =  await fetchPost(
         `/rooms/${roomId}/users`,
         body
-    ) as Object
+    )
 
     if ('token' in json) {
-        return json.token as string
+        let jwtDict: JwtDict = {}
+        const jwtJSON = Cookies.get('jwts')
+
+        if (jwtJSON !== undefined) {
+            jwtDict = JSON.parse(jwtJSON)
+        }
+
+        jwtDict[roomId] = json.token as string
+        Cookies.set('jwts', JSON.stringify(jwtDict))
     }
     
     throw fetchError(json)
@@ -25,10 +31,30 @@ export async function deleteUser(
     roomId: string,
     user: string
 ): Promise<null> {
+    let jwtDict: JwtDict = {}
+    const jwtJSON = Cookies.get('jwts')
+
+    if (jwtJSON !== undefined) {
+        jwtDict = JSON.parse(jwtJSON)
+    }
+
+    const token = jwtDict[roomId]
+
+    if (token === undefined) {
+        throw new Error('Authorization failed - JWT missing')
+    }
+    
     const json =  await fetchDelete(
         `/rooms/${roomId}/users`,
-        user
+        user,
+        {
+            'Authorization': `Bearer ${token}`
+        }
     )
+
+    // remove now useless token
+    delete jwtDict[roomId]
+    Cookies.set('jwts', JSON.stringify(jwtDict))
 
     if (json === null) {
         return null

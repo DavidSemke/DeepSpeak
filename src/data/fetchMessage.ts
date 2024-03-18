@@ -1,12 +1,14 @@
+import Cookies from "js-cookie";
 import { fetchError, fetchMany, fetchPost } from "./fetchAny";
-import { Message } from "../types/apiData";
+import type { Message } from "../types/api";
+import type { JwtDict } from "../types/cookie";
 
 
 export async function getManyMessages(
     roomId: string,
     orderBy='topic', 
     order='asc', 
-    limit=10, 
+    limit=12, 
     offset=0
 ): Promise<Message[]> {
     const json = await fetchMany(
@@ -24,21 +26,33 @@ export async function getManyMessages(
     throw fetchError(json)
 }
 
-type MessageBody = {
-    content: string
-}
-
 export async function postMessage(
     roomId: string,
-    body: MessageBody
-): Promise<null> {
+    body: FormData
+): Promise<Message> {
+    let jwtDict: JwtDict = {}
+    const jwtJSON = Cookies.get('jwts')
+
+    if (jwtJSON !== undefined) {
+        jwtDict = JSON.parse(jwtJSON)
+    }
+
+    const token = jwtDict[roomId]
+
+    if (token === undefined) {
+        throw new Error('Authorization failed - JWT missing')
+    }
+
     const json = await fetchPost(
         `/rooms/${roomId}/messages`,
-        body
+        body,
+        {
+            'Authorization': `Bearer ${token}`
+        }
     )
 
-    if (json === null) {
-        return null
+    if ('message' in json) {
+        return json.message as Message
     }
     
     throw fetchError(json)
