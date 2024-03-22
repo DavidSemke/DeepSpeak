@@ -4,9 +4,7 @@ import type { Room } from '../types/api'
 import type { JwtDict } from '../types/cookie'
 
 
-async function fetchJoinedRooms(
-  setJoinedRooms: React.Dispatch<React.SetStateAction<Room[] | null>>
-) {
+export async function fetchJoinedRooms(): Promise<Room[]> {
     let jwtDict: JwtDict = {}
     const jwtJSON = Cookies.get('jwts')
 
@@ -22,16 +20,14 @@ async function fetchJoinedRooms(
             return getRoom(key)
           })
     )
-    setJoinedRooms(joinedRooms)
 
     return joinedRooms
 }
 
-async function fetchOpenRooms(
-  joinedRooms: Room[], 
-  setOpenRooms: React.Dispatch<React.SetStateAction<Room[] | null>>,
+export async function fetchOpenRooms(
+  joinedRooms: Room[],
   limit=12
-) {
+): Promise<Room[]> {
   const filters = []
 
    // Filter to prevent overlap between joinedRooms and openRooms 
@@ -84,13 +80,5 @@ async function fetchOpenRooms(
   }
 
   // Slice to get <= limit open rooms
-  setOpenRooms(openRooms.slice(-limit))
-}
-
-export async function fetchData(
-  setJoinedRooms: React.Dispatch<React.SetStateAction<Room[] | null>>, 
-  setOpenRooms: React.Dispatch<React.SetStateAction<Room[] | null>>
-) {
-  const joinedRooms = await fetchJoinedRooms(setJoinedRooms)
-  await fetchOpenRooms(joinedRooms, setOpenRooms)
+  return openRooms.slice(-limit)
 }

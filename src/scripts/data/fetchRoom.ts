@@ -1,4 +1,9 @@
-import { fetchMany, fetchGet, fetchPost, fetchError } from "./fetchAny";
+import { 
+    fetchMany, 
+    fetchGet, 
+    fetchPost, 
+    fetchArrayValidationError
+} from "./fetchAny";
 import type { Room } from "../types/api";
 
 
@@ -20,7 +25,7 @@ export async function getManyRooms(
         return json.room_collection as Room[]
     }
     
-    throw fetchError(json)
+    throw fetchArrayValidationError(json)
 }
 
 export async function getRoom(
@@ -32,7 +37,7 @@ export async function getRoom(
         return json.room as Room
     }
     
-    throw fetchError(json)
+    throw fetchArrayValidationError(json)
 }
 
 export async function postRoom(
@@ -47,5 +52,5 @@ export async function postRoom(
         return json.room as Room
     }
 
-    throw fetchError(json)
+    throw fetchArrayValidationError(json)
 }

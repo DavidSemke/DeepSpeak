@@ -1,11 +1,11 @@
-type Message = {
+export type Message = {
     _id: string
     content: string
     create_date: Date
     user: string
 }
   
-type Room = {
+export type Room = {
     _id: string
     topic: string
     create_date: Date
@@ -14,9 +14,4 @@ type Room = {
     users: string[]
     deleted_users: string[]
     messages: Message[]
-}
-
-export type {
-    Message,
-    Room
 }

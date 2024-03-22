@@ -1,3 +1,8 @@
+import { 
+    ArrayValidationError, isValidationObject,
+} from "../errors/validationError";
+
+
 const baseUrl = 'https://deepspeakapi.fly.dev'
 
 export async function fetchMany( 
@@ -75,7 +80,21 @@ export async function fetchDelete(
     return null
 }
 
-export function fetchError(json: Object): Error {
+export function fetchArrayValidationError(
+    json: Object
+): ArrayValidationError {
+    if (
+        'errors' in json 
+        && Array.isArray(json.errors)
+        && isValidationObject(json.errors[0])
+    ) {
+        return new ArrayValidationError(json.errors)
+    }
+
+    throw fetchError(json)
+}
+
+function fetchError(json: Object): Error {
     if (
         'errors' in json
         && Array.isArray(json.errors)

@@ -1,7 +1,7 @@
 import { useOutletContext } from "react-router-dom"
-import RoomGrid from "../grid/RoomGrid"
+import RoomGrid from "../layout/RoomGrid"
 import type { Room } from "../../types/api"
-import { unexpectedStateError } from "../../utils/customError"
+import { unexpectedStateError } from "../../errors/basicError"
 
 type IndexPageProps = {
   joinedRooms: Room[],

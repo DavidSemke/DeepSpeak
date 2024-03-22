@@ -6,6 +6,7 @@ import ErrorPage from './components/page/ErrorPage.jsx'
 import IndexPage from './components/page/IndexPage.jsx'
 import RoomPage from './components/page/RoomPage.jsx'
 import CreateRoomPage from './components/page/CreateRoomPage.jsx'
+import '../stylesheets/styles.scss'
 
 const router = createBrowserRouter([
   {

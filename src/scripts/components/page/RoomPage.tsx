@@ -5,7 +5,7 @@ import { wordTimestamp } from "../../utils/formatDate"
 import { InputGroup, Button, Form } from "react-bootstrap"
 import { postMessage } from "../../data/fetchMessage"
 import { getRoom } from "../../data/fetchRoom"
-import { unexpectedStateError } from "../../utils/customError"
+import { unexpectedStateError } from "../../errors/basicError"
 
 
 type RoomPageProps = {

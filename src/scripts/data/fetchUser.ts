@@ -1,12 +1,16 @@
 import Cookies from "js-cookie";
 import { JwtDict } from "../types/cookie";
-import { fetchPost, fetchDelete, fetchError } from "./fetchAny";
+import { 
+    fetchPost, 
+    fetchDelete, 
+    fetchArrayValidationError 
+} from "./fetchAny";
 
 
 export async function postUser(
     roomId: string,
     body: FormData
-): Promise<void> {
+) {
     const json =  await fetchPost(
         `/rooms/${roomId}/users`,
         body
@@ -22,15 +26,17 @@ export async function postUser(
 
         jwtDict[roomId] = json.token as string
         Cookies.set('jwts', JSON.stringify(jwtDict))
+
+        return
     }
     
-    throw fetchError(json)
+    throw fetchArrayValidationError(json)
 }
 
 export async function deleteUser(
     roomId: string,
     user: string
-): Promise<null> {
+) {
     let jwtDict: JwtDict = {}
     const jwtJSON = Cookies.get('jwts')
 
@@ -57,8 +63,8 @@ export async function deleteUser(
     Cookies.set('jwts', JSON.stringify(jwtDict))
 
     if (json === null) {
-        return null
+        return
     }
     
-    throw fetchError(json)
+    throw fetchArrayValidationError(json)
 }

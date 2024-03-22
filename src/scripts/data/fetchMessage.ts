@@ -1,5 +1,9 @@
 import Cookies from "js-cookie";
-import { fetchError, fetchMany, fetchPost } from "./fetchAny";
+import { 
+    fetchMany, 
+    fetchPost, 
+    fetchArrayValidationError
+} from "./fetchAny";
 import type { Message } from "../types/api";
 import type { JwtDict } from "../types/cookie";
 
@@ -23,7 +27,7 @@ export async function getManyMessages(
         return json.message_collection as Message[]
     }
     
-    throw fetchError(json)
+    throw fetchArrayValidationError(json)
 }
 
 export async function postMessage(
@@ -55,5 +59,5 @@ export async function postMessage(
         return json.message as Message
     }
     
-    throw fetchError(json)
+    throw fetchArrayValidationError(json)
 }
