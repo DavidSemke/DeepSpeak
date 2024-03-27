@@ -3,43 +3,60 @@ import {
 } from "../errors/validationError";
 
 
-const baseUrl = 'https://deepspeakapi.fly.dev'
+type JsonObject = { [key: string]: unknown }
+
+type FetchReturn = {
+    status: number,
+    json: JsonObject
+}
+
+// const baseUrl = 'https://deepspeakapi.fly.dev'
+const baseUrl = 'http://localhost:3000'
 
 export async function fetchMany( 
     pathToCollection: string, 
     orderBy='topic', 
     order='asc', 
     limit=10, 
-    offset=0
-): Promise<Object> {
-    const url = `${baseUrl}${pathToCollection}?`
+    offset=0,
+    populate: string | undefined = undefined
+): Promise<FetchReturn> {
+    let url = `${baseUrl}${pathToCollection}?`
         + `order-by=${orderBy}`
         + `&order=${order}`
         + `&limit=${limit}`
-        + `&offset=${offset}` 
+        + `&offset=${offset}`
+    
+    if (populate !== undefined) {
+        url += `&populate=${populate}` 
+    } 
 
     const res = await fetch(url, { mode: "cors" });
-    
-    return await res.json(); 
+    const json = await res.json()
+    const status = res.status
+
+    return { status, json };
 }
 
 export async function fetchGet(
     pathToCollection: string, 
     documentId: string
-): Promise<Object> {
+): Promise<FetchReturn> {
     const res = await fetch(
         `${baseUrl}${pathToCollection}/${documentId}`, 
         { mode: "cors" }
     );
+    const json = await res.json()
+    const status = res.status
 
-    return await res.json();
+    return { status, json };
 }
 
 export async function fetchPost(
     pathToCollection: string, 
     body: FormData,
     headers: { [key: string]: string } = {}
-): Promise<Object> {
+): Promise<FetchReturn> {
     const res = await fetch(
         `${baseUrl}${pathToCollection}`, 
         { 
@@ -49,15 +66,17 @@ export async function fetchPost(
             headers
         }
     );
+    const json = await res.json()
+    const status = res.status
 
-    return await res.json();
+    return { status, json };
 }
 
 export async function fetchDelete(
     pathToCollection: string, 
     user: string,
     headers: { [key: string]: string } = {}
-): Promise<Object | null> {
+): Promise<FetchReturn | null> {
     const res = await fetch(
         `${baseUrl}${pathToCollection}/${user}`,
         { 
@@ -74,14 +93,17 @@ export async function fetchDelete(
         contentType 
         && contentType.includes('application/json')
     ) {
-        return await res.json();
+        const json = await res.json()
+        const status = res.status
+
+        return { status, json };
     }
     
     return null
 }
 
 export function fetchArrayValidationError(
-    json: Object
+    json: JsonObject
 ): ArrayValidationError {
     if (
         'errors' in json 
@@ -94,7 +116,7 @@ export function fetchArrayValidationError(
     throw fetchError(json)
 }
 
-function fetchError(json: Object): Error {
+function fetchError(json: JsonObject): Error {
     if (
         'errors' in json
         && Array.isArray(json.errors)

@@ -1,24 +1,26 @@
 import Cookies from 'js-cookie'
 import { getManyRooms, getRoom } from './fetchRoom'
 import type { Room } from '../types/api'
-import type { JwtDict } from '../types/cookie'
+import type { JoinedRoomDict } from '../types/cookie'
+import { getMessage } from './fetchMessage'
 
 
 export async function fetchJoinedRooms(): Promise<Room[]> {
-    let jwtDict: JwtDict = {}
-    const jwtJSON = Cookies.get('jwts')
+    let joinedRoomDict: JoinedRoomDict = {}
+    const joinedRoomsJson = Cookies.get('joinedRooms')
 
-    if (jwtJSON !== undefined) {
-      jwtDict = JSON.parse(jwtJSON)
+    if (joinedRoomsJson !== undefined) {
+      joinedRoomDict = JSON.parse(joinedRoomsJson)
     }
 
-    let joinedRooms: Room[]
-    joinedRooms = await Promise.all(
-        Object
-          .keys(jwtDict)
+    const results = await Promise.all(
+        Object.keys(joinedRoomDict)
           .map((key) => {
             return getRoom(key)
           })
+    )
+    const joinedRooms: Room[] = results.filter(
+      (room): room is Room => room !== null
     )
 
     return joinedRooms
@@ -80,5 +82,21 @@ export async function fetchOpenRooms(
   }
 
   // Slice to get <= limit open rooms
-  return openRooms.slice(-limit)
+  openRooms = openRooms.slice(-limit)
+
+  // Populate latest message of each room
+  for (const room of openRooms) {
+    const { _id, messages } = room
+    const latestMsgIndex = messages.length-1
+    const latestMsgId: unknown = messages[latestMsgIndex]
+
+    if (!latestMsgId || typeof latestMsgId !== 'string') {
+      continue
+    }
+
+    const latestMsg = await getMessage(_id, latestMsgId)
+    messages[latestMsgIndex] = latestMsg
+  }
+
+  return openRooms
 }

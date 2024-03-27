@@ -2,20 +2,22 @@ import Cookies from "js-cookie";
 import { 
     fetchMany, 
     fetchPost, 
-    fetchArrayValidationError
+    fetchArrayValidationError,
+    fetchGet
 } from "./fetchAny";
 import type { Message } from "../types/api";
-import type { JwtDict } from "../types/cookie";
+import type { JoinedRoomDict } from "../types/cookie";
+import { authFailError } from "../errors/basicError";
 
 
 export async function getManyMessages(
     roomId: string,
-    orderBy='topic', 
+    orderBy='create_date', 
     order='asc', 
-    limit=12, 
+    limit=100, 
     offset=0
 ): Promise<Message[]> {
-    const json = await fetchMany(
+    const {json} = await fetchMany(
         `/rooms/${roomId}/messages`,
         orderBy, 
         order, 
@@ -34,20 +36,20 @@ export async function postMessage(
     roomId: string,
     body: FormData
 ): Promise<Message> {
-    let jwtDict: JwtDict = {}
-    const jwtJSON = Cookies.get('jwts')
+    const joinedRoomsJson = Cookies.get('joinedRooms')
 
-    if (jwtJSON !== undefined) {
-        jwtDict = JSON.parse(jwtJSON)
+    if (joinedRoomsJson === undefined) {
+        throw authFailError('cookie missing')
     }
 
-    const token = jwtDict[roomId]
+    const joinedRoomDict: JoinedRoomDict = JSON.parse(joinedRoomsJson)
+    const token = joinedRoomDict[roomId].token
 
     if (token === undefined) {
-        throw new Error('Authorization failed - JWT missing')
+        throw authFailError('JWT missing')
     }
 
-    const json = await fetchPost(
+    const {json} = await fetchPost(
         `/rooms/${roomId}/messages`,
         body,
         {
@@ -59,5 +61,21 @@ export async function postMessage(
         return json.message as Message
     }
     
+    throw fetchArrayValidationError(json)
+}
+
+export async function getMessage(
+    roomId: string,
+    messageId: string
+): Promise<Message> {
+    const {json} = await fetchGet(
+        `/rooms/${roomId}/messages`, 
+        messageId
+    )
+
+    if ('message' in json) {
+        return json.message as Message
+    }
+
     throw fetchArrayValidationError(json)
 }

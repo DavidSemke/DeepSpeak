@@ -1,31 +1,35 @@
 import Cookies from "js-cookie";
-import { JwtDict } from "../types/cookie";
+import type { JoinedRoomDict } from "../types/cookie";
 import { 
     fetchPost, 
     fetchDelete, 
     fetchArrayValidationError 
 } from "./fetchAny";
+import { authFailError } from "../errors/basicError";
 
 
 export async function postUser(
     roomId: string,
     body: FormData
 ) {
-    const json =  await fetchPost(
+    const { json } =  await fetchPost(
         `/rooms/${roomId}/users`,
         body
     )
 
     if ('token' in json) {
-        let jwtDict: JwtDict = {}
-        const jwtJSON = Cookies.get('jwts')
+        let joinedRoomDict: JoinedRoomDict = {}
+        const joinedRoomsJson = Cookies.get('joinedRooms')
 
-        if (jwtJSON !== undefined) {
-            jwtDict = JSON.parse(jwtJSON)
+        if (joinedRoomsJson !== undefined) {
+            joinedRoomDict = JSON.parse(joinedRoomsJson)
         }
 
-        jwtDict[roomId] = json.token as string
-        Cookies.set('jwts', JSON.stringify(jwtDict))
+        joinedRoomDict[roomId] = {
+            token: json.token as string,
+            user: body.get('user') as string
+        }
+        Cookies.set('joinedRooms', JSON.stringify(joinedRoomDict))
 
         return
     }
@@ -37,20 +41,21 @@ export async function deleteUser(
     roomId: string,
     user: string
 ) {
-    let jwtDict: JwtDict = {}
-    const jwtJSON = Cookies.get('jwts')
+    let joinedRoomDict: JoinedRoomDict = {}
+    const joinedRoomsJson = Cookies.get('joinedRooms')
 
-    if (jwtJSON !== undefined) {
-        jwtDict = JSON.parse(jwtJSON)
+    if (joinedRoomsJson === undefined) {
+        throw authFailError('cookie missing')
     }
 
-    const token = jwtDict[roomId]
+    joinedRoomDict = JSON.parse(joinedRoomsJson)
+    const token = joinedRoomDict[roomId]?.token
 
     if (token === undefined) {
-        throw new Error('Authorization failed - JWT missing')
+        throw authFailError('JWT missing')
     }
     
-    const json =  await fetchDelete(
+    const result =  await fetchDelete(
         `/rooms/${roomId}/users`,
         user,
         {
@@ -58,13 +63,13 @@ export async function deleteUser(
         }
     )
 
-    // remove now useless token
-    delete jwtDict[roomId]
-    Cookies.set('jwts', JSON.stringify(jwtDict))
-
-    if (json === null) {
+    if (result === null) {
+        // Remove now useless token
+        delete joinedRoomDict[roomId]
+        Cookies.set('joinedRooms', JSON.stringify(joinedRoomDict))
+        
         return
     }
     
-    throw fetchArrayValidationError(json)
+    throw fetchArrayValidationError(result.json)
 }

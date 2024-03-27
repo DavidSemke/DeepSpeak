@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useEffect } from 'react'
-import { Outlet, Link } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import { 
   Container, 
   Navbar,  
@@ -46,9 +46,8 @@ function App() {
   }, [])
 
   if (error !== null) {
-    return (
-      <p>A network error occurred.</p>
-    )
+    // Go to react router error element page
+    throw error
   }
 
   if (joinedRooms === null || openRooms === null) {
@@ -60,7 +59,7 @@ function App() {
   return (
     <>
     <Navbar
-      expand='md'
+      expand={false}
       className='bg-body-tertiary'
     >
       <Container fluid>
@@ -78,15 +77,18 @@ function App() {
         />
       </Container>
     </Navbar>
-    <Outlet context={{
-        joinedRooms,
-        openRooms,
-        joinedRoomIndex,
-        setJoinedRooms,
-        setOpenRooms,
-        setJoinedRoomIndex
-      }} 
-    />
+    <Container className='p-3'>
+      <Outlet context={{
+          joinedRooms,
+          openRooms,
+          joinedRoomIndex,
+          setJoinedRooms,
+          setOpenRooms,
+          setJoinedRoomIndex
+        }}
+      />
+    </Container>
+    
     </>
   )
 }

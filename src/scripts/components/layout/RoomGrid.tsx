@@ -1,7 +1,7 @@
 import { Container, Row, Col } from "react-bootstrap"
+import { Link } from "react-router-dom"
 import RoomCard from "../card/RoomCard"
 import type { Room } from "../../types/api"
-import { Link } from "react-router-dom"
 
 type RoomGridProps = {
     rooms: Room[],
@@ -42,8 +42,16 @@ function RoomGrid(
                             {
                                 group.map((room) => {
                                     return (
-                                        <Col sm={12} md={6} lg={3} className="mb-3">
-                                            <Link to={`/rooms/${room._id}`}>
+                                        <Col 
+                                            key={room._id}
+                                            sm={12} 
+                                            md={6} 
+                                            lg={4} 
+                                            className="mb-3"
+                                        >
+                                            <Link
+                                                to={`/rooms/${room._id}`}
+                                            >
                                                 <RoomCard 
                                                     room={room}
                                                     selectRoom={selectRoom}
@@ -51,6 +59,8 @@ function RoomGrid(
                                                 />
                                             </Link>
                                         </Col>
+                                        
+                                        
                                     )
                                 })
                             }

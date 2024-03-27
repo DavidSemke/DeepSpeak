@@ -9,22 +9,28 @@ type RoomListProps = {
     setSelectedIndex: React.Dispatch<React.SetStateAction<number | null>>
 }
 
-function RoomList({ rooms, selectedIndex, setSelectedIndex }: RoomListProps) {
+function RoomList({ 
+    rooms, 
+    selectedIndex,
+    setSelectedIndex
+}: RoomListProps) {
     return (
         <ListGroup as="ul" variant="flush">
             { rooms.map((room, index) => {
-                const isSelected = selectedIndex !== null && selectedIndex === index
+                const isSelected = (
+                    selectedIndex !== null 
+                    && selectedIndex === index
+                )
 
                 return (
                     <ListGroupItem
                         key={room._id}
-                        as="li" 
+                        as="li"
                         onClick={() => setSelectedIndex(index)}
                     >
                         <Link to={`/rooms/${room._id}`}>
                             <RoomCard 
                                 room={room}
-                                selectRoom={() => setSelectedIndex(index)}
                                 useVariant={isSelected}
                             />
                         </Link>

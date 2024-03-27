@@ -1,4 +1,10 @@
-import { Link, useOutletContext } from "react-router-dom"
+import { 
+  Link, 
+  useOutletContext, 
+  useParams 
+} from "react-router-dom"
+import { useEffect, useState } from "react"
+import Cookies from "js-cookie"
 import MessageCard from "../card/MessageCard"
 import type { Room } from "../../types/api"
 import { wordTimestamp } from "../../utils/formatDate"
@@ -6,6 +12,9 @@ import { InputGroup, Button, Form } from "react-bootstrap"
 import { postMessage } from "../../data/fetchMessage"
 import { getRoom } from "../../data/fetchRoom"
 import { unexpectedStateError } from "../../errors/basicError"
+import type { JoinedRoomDict } from "../../types/cookie"
+import { authFailError } from "../../errors/basicError"
+import { deleteUser } from "../../data/fetchUser"
 
 
 type RoomPageProps = {
@@ -16,11 +25,11 @@ type RoomPageProps = {
   setOpenRooms: React.Dispatch<React.SetStateAction<Room[] | null>>
 }
 
-/* 
-  Params are available here, but not used due to necessity of 
-  joinedRoomIndex state
-*/
+
 function RoomPage() {
+  const { roomId } = useParams()
+  const [prevRoomId, setPrevRoomId] = useState<string | undefined>(undefined)
+
   const {
     joinedRooms,
     joinedRoomIndex,
@@ -28,16 +37,58 @@ function RoomPage() {
     setJoinedRooms,
     setOpenRooms
   } = useOutletContext<RoomPageProps>()
+  
+  useEffect(() => {
+    for (let i=0; i<joinedRooms.length; i++) {
+      const room = joinedRooms[i]
 
-  if (joinedRoomIndex === null) {
-    throw unexpectedStateError('joinedRoomIndex', null)
+      if (room._id === roomId) {
+        setJoinedRoomIndex(i)
+        break
+      }
+    }
+
+    const timeoutId = setTimeout(() => {
+      setPrevRoomId(roomId)
+    }, 3000);
+
+    return () => clearTimeout(timeoutId);
+  }, [roomId])
+
+  if (
+    joinedRoomIndex === null
+    || joinedRooms[joinedRoomIndex]._id !== roomId
+  ) {
+    if (prevRoomId === roomId) {
+      throw new Error('Could not join room')
+    }
+    // Assume that joinedRoomIndex is in the process of being set
+    // If this assumption is false, error is thrown after timeout
+    return (
+      <p>Loading...</p>
+    )
   }
 
   const room = joinedRooms[joinedRoomIndex]
   const {topic, create_date, users, messages} = room
   const createDate = wordTimestamp(create_date)
   
-  function leaveRoom() {
+  async function leaveRoom() {
+    const joinedRoomsJson = Cookies.get('joinedRooms')
+
+    if (joinedRoomsJson === undefined) {
+        throw authFailError('cookie missing')
+    }
+
+    const joinedRoomDict: JoinedRoomDict = JSON.parse(joinedRoomsJson)
+    const roomData = joinedRoomDict[room._id]
+
+    if (roomData === undefined) {
+      throw authFailError('value for roomId key undefined')
+    }
+
+    await deleteUser(room._id, joinedRoomDict[room._id].user)
+
     setJoinedRooms((joinedRooms) => {
         if (joinedRooms === null) {
             throw unexpectedStateError('joinedRooms', null)
@@ -64,6 +115,11 @@ function RoomPage() {
     await postMessage(room._id, new FormData(form))
     const updatedRoom = await getRoom(room._id)
 
+    if (updatedRoom === null) {
+      leaveRoom()
+      throw new Error('Room has expired')
+    }
+
     setJoinedRooms((joinedRooms) => {
       if (joinedRooms === null) {
         throw unexpectedStateError('joinedRooms', null)
@@ -80,20 +136,24 @@ function RoomPage() {
   }
 
   return (
-      <div>
-        <div className="d-flex justify-content-between">
-          <h1 className="text-capitalize text-truncate">{topic}</h1>
-          <Link to="/">
-            <Button 
-              variant="primary"
-              onClick={leaveRoom}
-            >
-              Leave Room
-            </Button>
-          </Link>
+      <>
+        <div className="mb-4">
+          <div className="d-flex justify-content-between">
+            <h1 className="text-capitalize text-truncate">{topic}</h1>
+            <Link to="/">
+              <Button 
+                variant="primary"
+                onClick={leaveRoom}
+              >
+                Leave Room
+              </Button>
+            </Link>
+          </div>
+          
+          <div className="text-muted">Created on {createDate}</div>
+          <div className="text-muted">Users: {users.join(', ')}</div>
         </div>
-        <div className="text-muted">Created on {createDate}</div>
-        <div className="text-muted">Users: {users.join(', ')}</div>
+        <div className="d-flex flex-column gap-3 mb-4">
         {
           messages.map((msg) => {
             return (
@@ -104,6 +164,7 @@ function RoomPage() {
             )
           })
         }
+        </div>
         <Form onSubmit={addMessage}>
           <Form.Group>
             <InputGroup>
@@ -122,7 +183,7 @@ function RoomPage() {
             </InputGroup>
           </Form.Group>
         </Form>
-      </div>
+      </>
     )
   }
   
