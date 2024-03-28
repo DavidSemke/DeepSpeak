@@ -1,3 +1,4 @@
+import { Container } from "react-bootstrap";
 import { useRouteError } from "react-router-dom";
 import { Link } from "react-router-dom";
 
@@ -14,18 +15,34 @@ function ErrorPage() {
     }
   }
 
+
+
   return (
-    <>
-      <h1>Oops!</h1>
-      <p>Sorry, an unexpected error has occurred.</p>
-      <p>
+    <Container>
+      <h1
+        className="display-1 mt-5"
+      >
+        Oops!
+      </h1>
+      <p
+        className="fs-1"
+      >
+        Sorry, an error has occurred.
+      </p>
+      <p
+        className="fs-3"
+      >
         <i>{msg}</i>
       </p>
       <Link to='/'>
-        Return Home
+        <span
+          className="fs-3"
+        >
+          Return Home
+        </span>
+        
       </Link>
-      
-    </>
+    </Container>
   );
 }
 
