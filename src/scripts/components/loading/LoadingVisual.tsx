@@ -3,16 +3,19 @@ import { Spinner } from "react-bootstrap"
 
 function LoadingVisual() {
     return (
-        <Spinner 
-            animation="border" 
-            role="status"
-        >
-            <span 
-            className="visually-hidden"
+        <div className="loading-visual">
+            <Spinner 
+                animation="border" 
+                role="status"
+                variant="primary"
             >
-            Loading...
-            </span>
-        </Spinner>
+                <span 
+                className="visually-hidden"
+                >
+                Loading...
+                </span>
+            </Spinner>
+        </div>
     )
 }
 

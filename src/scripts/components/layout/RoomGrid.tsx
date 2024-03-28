@@ -46,7 +46,8 @@ function RoomGrid(
                                             key={room._id}
                                             sm={12} 
                                             md={6} 
-                                            lg={4} 
+                                            lg={4}
+                                            xl={3} 
                                             className="mb-3"
                                         >
                                             <Link
