@@ -1,91 +1,60 @@
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { useNavigate, useOutletContext } from "react-router-dom"
-import type { Room } from "../../types/api"
-import { Button, Form, ListGroup, ListGroupItem } from "react-bootstrap"
-import { postRoom } from "../../data/fetchRoom"
-import { unexpectedStateError } from "../../errors/basicError"
-import { ArrayValidationError } from "../../errors/validationError"
+import { Button, Form } from "react-bootstrap"
+import { ErrorContext } from "../../utils/reactContext"
+import { addRoom } from "../../events/room"
+import type { 
+  Room, 
+  StateSetter, 
+  RoomValidationErrorObject 
+} from "../../utils/types"
 
 
 type CreateRoomPageProps = {
   joinedRooms: Room[],
-  setJoinedRoomIndex: React.Dispatch<React.SetStateAction<number | null>>,
-  setJoinedRooms: React.Dispatch<React.SetStateAction<Room[] | null>>
-}
-
-type ValidationErrors = {
-  topic: string[]
-  maxUserCount: string[]
+  openRooms: Room[],
+  setJoinedRooms: StateSetter<Room[] | null>,
+  setOpenRooms: StateSetter<Room[] | null>
+  setJoinedRoomIndex: StateSetter<number | null>,
 }
 
 function CreateRoomPage() {
-  const navigate = useNavigate()
+  const { setError } = useContext(ErrorContext)
   const [
     validationErrors, 
     setValidationErrors
-  ] = useState<ValidationErrors>({
+  ] = useState<RoomValidationErrorObject>({
     topic: [],
     maxUserCount: []
   })
+  const navigate = useNavigate()
 
   const {
     joinedRooms,
+    openRooms,
+    setJoinedRooms,
+    setOpenRooms,
     setJoinedRoomIndex,
-    setJoinedRooms
   } = useOutletContext<CreateRoomPageProps>()
-
-  async function addRoom(
-    event: React.SyntheticEvent<HTMLFormElement>
-  ) {
-    event.preventDefault()
-    const form = event.currentTarget
-    
-    let newRoom: Room
-    let topicErrors: string[] = []
-    let maxUserCountErrors: string[] = []
-    
-    try {
-      newRoom = await postRoom(new FormData(form))
-    }
-    catch(err) {
-      if (!(err instanceof ArrayValidationError)) {
-        throw err
-      }
-      
-      for (const obj of err.validationObjects) {
-        if (obj.path === 'topic') {
-          topicErrors.push(obj.msg)
-        }
-        else if (obj.path === 'max-user-count') {
-          maxUserCountErrors.push(obj.msg)
-        }
-      }
-
-      setValidationErrors({
-        topic: topicErrors,
-        maxUserCount: maxUserCountErrors
-      })
-
-      return
-    }
-
-    setJoinedRooms((joinedRooms) => {
-        if (joinedRooms === null) {
-            throw unexpectedStateError('joinedRooms', null)
-        }
-
-        return [...joinedRooms, newRoom]
-    })
-    setJoinedRoomIndex(joinedRooms.length)
-
-    // redirect to new room page
-    navigate(`/rooms/${newRoom._id}`)
-  }
 
   return (
     <>
       <h1>Create Room</h1>
-      <Form onSubmit={addRoom}>
+      <Form noValidate onSubmit={
+        (event) => {
+          addRoom(
+            event,
+            joinedRooms,
+            openRooms,
+            setJoinedRooms,
+            setOpenRooms,
+            setJoinedRoomIndex,
+            setError,
+            setValidationErrors,
+            navigate
+          )
+        }
+      }>
         <Form.Group 
           controlId="topic"
           className="mb-3"
@@ -95,20 +64,22 @@ function CreateRoomPage() {
               type="text"
               name="topic"
               required
-          />
-          <Form.Control.Feedback type='invalid'>
-            <ListGroup>
-              {
-                validationErrors.topic.map((msg) => {
-                  return (
-                    <ListGroupItem key={msg}>
-                      {msg}
-                    </ListGroupItem>
-                  )
-                })
+              isInvalid={
+                Boolean(validationErrors.topic.length)
               }
-            </ListGroup>
-          </Form.Control.Feedback>
+          />
+          {
+            validationErrors.topic.map((msg) => {
+              return (
+                <Form.Control.Feedback 
+                  key={msg}
+                  type='invalid'
+                >
+                  {msg}
+                </Form.Control.Feedback>
+              )
+            })
+          }
         </Form.Group>
         <Form.Group 
           controlId="max-user-count"
@@ -119,26 +90,28 @@ function CreateRoomPage() {
               type="number"
               name="max-user-count"
               required
-              min={0}
-          />
-          <Form.Control.Feedback type='invalid'>
-            <ListGroup>
-              {
-                validationErrors.maxUserCount.map((msg) => {
-                  return (
-                    <ListGroupItem key={msg}>
-                      {msg}
-                    </ListGroupItem>
-                  )
-                })
+              min={2}
+              max={10}
+              isInvalid={
+                Boolean(validationErrors.maxUserCount.length)
               }
-            </ListGroup>
-          </Form.Control.Feedback>
+          />
+          {
+            validationErrors.maxUserCount.map((msg) => {
+              return (
+                <Form.Control.Feedback 
+                  key={msg}
+                  type='invalid'
+                >
+                  {msg}
+                </Form.Control.Feedback>
+              )
+            })
+          }
         </Form.Group>
         <Button 
             type="submit"
             variant="primary"
-            onClick={() => console.log('yes')}
         >
             Submit
         </Button>
