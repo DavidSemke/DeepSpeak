@@ -14,6 +14,7 @@ export class ArrayValidationError extends Error {
     ) {
         super('Validation failed')
         this.validationObjects = validationObjects
+        this.name = 'ArrayValidationError'
     }
 }
 

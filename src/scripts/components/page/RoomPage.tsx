@@ -3,35 +3,37 @@ import {
   useOutletContext, 
   useParams 
 } from "react-router-dom"
-import { useEffect, useState } from "react"
-import Cookies from "js-cookie"
+import { useContext, useEffect, useState } from "react"
 import MessageCard from "../card/MessageCard"
-import type { Room } from "../../types/api"
-import { wordTimestamp } from "../../utils/formatDate"
+import LoadingVisual from "../loading/LoadingVisual"
+import { wordTimestamp } from "../../utils/dateFormat"
 import { InputGroup, Button, Form } from "react-bootstrap"
-import { postMessage } from "../../data/fetchMessage"
-import { getRoom } from "../../data/fetchRoom"
-import { unexpectedStateError } from "../../errors/basicError"
-import type { JoinedRoomDict } from "../../types/cookie"
-import { authFailError } from "../../errors/basicError"
-import { deleteUser } from "../../data/fetchUser"
+import { ErrorContext } from "../../utils/reactContext"
+import { addMessage } from "../../events/message"
+import { leaveRoom } from "../../events/room"
+import type { 
+  Room,
+  StateSetter 
+} from "../../utils/types"
 
 
 type RoomPageProps = {
   joinedRooms: Room[],
+  openRooms: Room[],
   joinedRoomIndex: number | null,
-  setJoinedRoomIndex: React.Dispatch<React.SetStateAction<number | null>>,
-  setJoinedRooms: React.Dispatch<React.SetStateAction<Room[] | null>>,
-  setOpenRooms: React.Dispatch<React.SetStateAction<Room[] | null>>
+  setJoinedRoomIndex: StateSetter<number | null>,
+  setJoinedRooms: StateSetter<Room[] | null>,
+  setOpenRooms: StateSetter<Room[] | null>
 }
 
-
 function RoomPage() {
+  const { setError } = useContext(ErrorContext)
   const { roomId } = useParams()
   const [prevRoomId, setPrevRoomId] = useState<string | undefined>(undefined)
 
   const {
     joinedRooms,
+    openRooms,
     joinedRoomIndex,
     setJoinedRoomIndex,
     setJoinedRooms,
@@ -65,75 +67,13 @@ function RoomPage() {
     // Assume that joinedRoomIndex is in the process of being set
     // If this assumption is false, error is thrown after timeout
     return (
-      <p>Loading...</p>
+      <LoadingVisual />
     )
   }
 
   const room = joinedRooms[joinedRoomIndex]
   const {topic, create_date, users, messages} = room
   const createDate = wordTimestamp(create_date)
-  
-  async function leaveRoom() {
-    const joinedRoomsJson = Cookies.get('joinedRooms')
-
-    if (joinedRoomsJson === undefined) {
-        throw authFailError('cookie missing')
-    }
-
-    const joinedRoomDict: JoinedRoomDict = JSON.parse(joinedRoomsJson)
-    const roomData = joinedRoomDict[room._id]
-
-    if (roomData === undefined) {
-      throw authFailError('value for roomId key undefined')
-    }
-
-    await deleteUser(room._id, joinedRoomDict[room._id].user)
-
-    setJoinedRooms((joinedRooms) => {
-        if (joinedRooms === null) {
-            throw unexpectedStateError('joinedRooms', null)
-        }
-  
-        return joinedRooms.filter(
-          joinedRoom => joinedRoom._id !== room._id
-        )
-    })
-    setOpenRooms((openRooms) => {
-        if (openRooms === null) {
-            throw unexpectedStateError('openRooms', null)
-        }
-  
-        return [...openRooms, room]
-    })
-    setJoinedRoomIndex(null)
-  }
-
-  async function addMessage(event: React.SyntheticEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const form = event.currentTarget
-
-    await postMessage(room._id, new FormData(form))
-    const updatedRoom = await getRoom(room._id)
-
-    if (updatedRoom === null) {
-      leaveRoom()
-      throw new Error('Room has expired')
-    }
-
-    setJoinedRooms((joinedRooms) => {
-      if (joinedRooms === null) {
-        throw unexpectedStateError('joinedRooms', null)
-      }
-      if (joinedRoomIndex === null) {
-        throw unexpectedStateError('joinedRoomIndex', null)
-      }
-
-      const newJoinedRooms = [...joinedRooms]
-      newJoinedRooms.splice(joinedRoomIndex, 1, updatedRoom)
-      
-      return newJoinedRooms
-    })
-  }
 
   return (
       <>
@@ -143,7 +83,17 @@ function RoomPage() {
             <Link to="/">
               <Button 
                 variant="primary"
-                onClick={leaveRoom}
+                onClick={
+                  () => leaveRoom(
+                    room,
+                    joinedRooms,
+                    openRooms,
+                    setJoinedRooms,
+                    setOpenRooms,
+                    setJoinedRoomIndex,
+                    setError
+                  )
+                }
               >
                 Leave Room
               </Button>
@@ -165,7 +115,17 @@ function RoomPage() {
           })
         }
         </div>
-        <Form onSubmit={addMessage}>
+        <Form onSubmit={
+          (event) => addMessage(
+            event,
+            room,
+            joinedRooms,
+            joinedRoomIndex,
+            setJoinedRooms,
+            setJoinedRoomIndex,
+            setError
+          )
+        }>
           <Form.Group>
             <InputGroup>
               <Form.Control

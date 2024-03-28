@@ -1,7 +1,6 @@
 import Cookies from 'js-cookie'
 import { getManyRooms, getRoom } from './fetchRoom'
-import type { Room } from '../types/api'
-import type { JoinedRoomDict } from '../types/cookie'
+import type { Room, JoinedRoomDict } from '../utils/types'
 import { getMessage } from './fetchMessage'
 
 

@@ -1,12 +1,12 @@
-import Cookies from 'js-cookie'
 import { 
     fetchMany, 
     fetchGet, 
     fetchPost, 
     fetchArrayValidationError
 } from "./fetchAny";
-import type { Room } from "../types/api";
-import type { JoinedRoomDict } from '../types/cookie';
+import type { Room } from '../utils/types'
+import { deleteJoinedRoomKey } from '../utils/cookie';
+import { resource404Error } from "../errors/errorFactory";
 
 
 export async function getManyRooms(
@@ -30,32 +30,18 @@ export async function getManyRooms(
     throw fetchArrayValidationError(json)
 }
 
-/*
-    Returns null if failed fetch is due to outdated jwt
-*/
 export async function getRoom(
     roomId: string
-): Promise<Room | null> {
+): Promise<Room> {
     const { status, json } = await fetchGet('/rooms', roomId)
-
-    if (status === 404) {
-        // Remove useless cookie data if present
-        const joinedRoomsJson = Cookies.get('joinedRooms')
-
-        if (joinedRoomsJson !== undefined) {
-            const joinedRoomDict: JoinedRoomDict = JSON.parse(joinedRoomsJson)
-
-            if (joinedRoomDict[roomId]) {
-                delete joinedRoomDict[roomId]
-                Cookies.set('joinedRooms', JSON.stringify(joinedRoomDict))
-
-                return null
-            }
-        }
-    }
 
     if ('room' in json) {
         return json.room as Room
+    }
+
+    if (status === 404) {
+        deleteJoinedRoomKey(roomId)
+        throw resource404Error('room')
     }
 
     throw fetchArrayValidationError(json)

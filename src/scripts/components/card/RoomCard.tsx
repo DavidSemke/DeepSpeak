@@ -1,6 +1,7 @@
 import { Card } from "react-bootstrap"
-import type { Room } from "../../types/api"
-import { timeUntil } from "../../utils/formatDate"
+import { timeUntil } from "../../utils/dateFormat"
+import type { Room } from "../../utils/types"
+
 
 type RoomCardProps = {
     room: Room,

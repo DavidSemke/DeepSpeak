@@ -4,15 +4,15 @@ import {
 } from 'react-bootstrap'
 import RoomList from './RoomList'
 import { Link } from 'react-router-dom'
-import type { Room } from '../../types/api'
+import type { Room, StateSetter } from '../../utils/types'
 
 
 type SidebarProps = {
     show: boolean,
-    setShow: React.Dispatch<React.SetStateAction<boolean>>,
+    setShow: StateSetter<boolean>,
     joinedRooms: Room[],
     joinedRoomIndex: number | null,
-    setJoinedRoomIndex: React.Dispatch<React.SetStateAction<number | null>>
+    setJoinedRoomIndex: StateSetter<number | null>
 }
 
 function Sidebar({

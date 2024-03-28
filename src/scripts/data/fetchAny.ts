@@ -1,10 +1,10 @@
 import { 
-    ArrayValidationError, isValidationObject,
+    ArrayValidationError, 
+    isValidationObject,
 } from "../errors/validationError";
 
 
 type JsonObject = { [key: string]: unknown }
-
 type FetchReturn = {
     status: number,
     json: JsonObject

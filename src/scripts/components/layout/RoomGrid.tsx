@@ -1,7 +1,7 @@
 import { Container, Row, Col } from "react-bootstrap"
 import { Link } from "react-router-dom"
 import RoomCard from "../card/RoomCard"
-import type { Room } from "../../types/api"
+import type { Room } from "../../utils/types"
 
 type RoomGridProps = {
     rooms: Room[],

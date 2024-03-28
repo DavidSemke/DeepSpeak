@@ -1,6 +1,7 @@
 import { Card } from "react-bootstrap"
-import type { Message } from "../../types/api"
-import { wordTimestamp } from "../../utils/formatDate"
+import { wordTimestamp } from "../../utils/dateFormat"
+import type { Message } from "../../utils/types"
+
 
 type MessageCardProps = {
     message: Message

@@ -1,37 +1,39 @@
-import Cookies from "js-cookie";
-import type { JoinedRoomDict } from "../types/cookie";
 import { 
     fetchPost, 
     fetchDelete, 
     fetchArrayValidationError 
 } from "./fetchAny";
-import { authFailError } from "../errors/basicError";
+import { authFailError, resource404Error } from "../errors/errorFactory";
+import { 
+    insertJoinedRoomKey, 
+    deleteJoinedRoomKey,
+    getJoinedRoomValue
+} from "../utils/cookie";
 
 
 export async function postUser(
     roomId: string,
     body: FormData
 ) {
-    const { json } =  await fetchPost(
+    const { status, json } =  await fetchPost(
         `/rooms/${roomId}/users`,
         body
     )
 
     if ('token' in json) {
-        let joinedRoomDict: JoinedRoomDict = {}
-        const joinedRoomsJson = Cookies.get('joinedRooms')
-
-        if (joinedRoomsJson !== undefined) {
-            joinedRoomDict = JSON.parse(joinedRoomsJson)
-        }
-
-        joinedRoomDict[roomId] = {
-            token: json.token as string,
-            user: body.get('user') as string
-        }
-        Cookies.set('joinedRooms', JSON.stringify(joinedRoomDict))
-
+        insertJoinedRoomKey(
+            roomId,
+            {
+                token: json.token as string,
+                user: body.get('user') as string
+            }
+        )
         return
+    }
+
+    if (status === 404) {
+        deleteJoinedRoomKey(roomId)
+        throw resource404Error('room')
     }
     
     throw fetchArrayValidationError(json)
@@ -41,15 +43,8 @@ export async function deleteUser(
     roomId: string,
     user: string
 ) {
-    let joinedRoomDict: JoinedRoomDict = {}
-    const joinedRoomsJson = Cookies.get('joinedRooms')
-
-    if (joinedRoomsJson === undefined) {
-        throw authFailError('cookie missing')
-    }
-
-    joinedRoomDict = JSON.parse(joinedRoomsJson)
-    const token = joinedRoomDict[roomId]?.token
+    const value = getJoinedRoomValue(roomId)
+    const token = value?.token
 
     if (token === undefined) {
         throw authFailError('JWT missing')
@@ -63,13 +58,17 @@ export async function deleteUser(
         }
     )
 
+    deleteJoinedRoomKey(roomId)
+
     if (result === null) {
-        // Remove now useless token
-        delete joinedRoomDict[roomId]
-        Cookies.set('joinedRooms', JSON.stringify(joinedRoomDict))
-        
         return
     }
     
-    throw fetchArrayValidationError(result.json)
+    const {status, json} = result
+
+    if (status === 404) {
+        throw resource404Error('room')
+    }
+    
+    throw fetchArrayValidationError(json)
 }

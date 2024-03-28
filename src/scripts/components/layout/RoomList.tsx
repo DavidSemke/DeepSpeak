@@ -1,12 +1,13 @@
 import { ListGroup, ListGroupItem } from "react-bootstrap"
 import RoomCard from "../card/RoomCard"
-import type { Room } from "../../types/api"
 import { Link } from "react-router-dom"
+import type { Room, StateSetter } from "../../utils/types"
+
 
 type RoomListProps = {
     rooms: Room[],
     selectedIndex: number | null,
-    setSelectedIndex: React.Dispatch<React.SetStateAction<number | null>>
+    setSelectedIndex: StateSetter<number | null>
 }
 
 function RoomList({ 
