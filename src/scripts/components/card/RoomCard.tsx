@@ -29,7 +29,7 @@ function RoomCard({room, selectRoom, useVariant, }: RoomCardProps) {
     
     return (
         <Card 
-            style={{width: '18rem'}} 
+            style={{width: '18rem', height: '13rem'}} 
             onClick={() => {
                 if (selectRoom) {
                     selectRoom(room) 
@@ -38,13 +38,14 @@ function RoomCard({room, selectRoom, useVariant, }: RoomCardProps) {
             border={useVariant ? 'primary' : ''}
         >
             <Card.Body>
-                <Card.Title className="text-capitalize fw-bold">
+                <Card.Title 
+                    className="text-capitalize fw-bold truncate-2">
                     {topic}
                 </Card.Title>
                 <Card.Text>
                     {timeUntilDelete}
                 </Card.Text>
-                <Card.Text className="text-muted">
+                <Card.Text className="text-muted truncate-2">
                     {preview}
                 </Card.Text>
                 <Card.Text>

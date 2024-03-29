@@ -96,7 +96,7 @@ function RoomPage() {
       <>
         <div className="mb-4">
           <div className="d-flex justify-content-between">
-            <h1 className="text-capitalize text-truncate">
+            <h1 className="text-capitalize">
               {topic}
             </h1>
             <Link to="/">
