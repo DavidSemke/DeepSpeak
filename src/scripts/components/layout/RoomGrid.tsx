@@ -1,4 +1,4 @@
-import { Container, Row, Col } from "react-bootstrap"
+import { Container } from "react-bootstrap"
 import { Link } from "react-router-dom"
 import RoomCard from "../card/RoomCard"
 import type { Room } from "../../utils/types"
@@ -19,56 +19,30 @@ function RoomGrid(
         )
     }
 
-    // max of 4 cards per row
-    const maxRowLength = 4
-    const groupedRooms: Room[][] = [[]]
-    let groupIndex = 0
-
-    for (const room of rooms) {
-        if (groupedRooms[groupIndex].length === maxRowLength) {
-            groupedRooms.push([])
-            groupIndex++
-        }
-
-        groupedRooms[groupIndex].push(room)
-    }
-
     return (
         <Container>
-            {
-                groupedRooms.map((group) => {
-                    return (
-                        <Row key={group[0]._id}>
-                            {
-                                group.map((room) => {
-                                    return (
-                                        <Col 
-                                            key={room._id}
-                                            sm={12} 
-                                            md={6} 
-                                            lg={4}
-                                            xl={3} 
-                                            className="mb-3"
-                                        >
-                                            <Link
-                                                to={`/rooms/${room._id}`}
-                                            >
-                                                <RoomCard 
-                                                    room={room}
-                                                    selectRoom={selectRoom}
-                                                    useVariant={false}
-                                                />
-                                            </Link>
-                                        </Col>
-                                        
-                                        
-                                    )
-                                })
-                            }
-                        </Row>
-                    )
-                })
-            }
+            <div className="room-card-grid">
+                {
+                    rooms.map((room) => {
+                        return (
+                            <div 
+                                key={room._id} 
+                                className="room-card-grid__cell"
+                            >
+                                <Link
+                                    to={`/rooms/${room._id}`}
+                                >
+                                    <RoomCard 
+                                        room={room}
+                                        selectRoom={selectRoom}
+                                        useVariant={false}
+                                    />
+                                </Link>
+                            </div>
+                        )
+                    })
+                }
+            </div>
         </Container>
     )
 }
