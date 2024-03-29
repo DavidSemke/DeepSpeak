@@ -39,7 +39,7 @@ function CreateRoomPage() {
 
   return (
     <>
-      <h1>Create Room</h1>
+      <h1 className="mb-4">Create Room</h1>
       <Form noValidate onSubmit={
         (event) => {
           addRoom(

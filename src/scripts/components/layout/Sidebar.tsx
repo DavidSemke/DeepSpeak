@@ -26,14 +26,14 @@ function Sidebar({
 
   return (
     <Offcanvas
-      id='left-sidebar'
-      aria-labelledby='left-sidebar__title'
-      placement="start"
+      id='right-sidebar'
+      aria-labelledby='right-sidebar__title'
+      placement="end"
       show={show}
       onHide={handleClose}
     >
       <Offcanvas.Header closeButton className='pb-0'>
-        <Offcanvas.Title id='left-sidebar__title'>
+        <Offcanvas.Title id='right-sidebar__title'>
           My Rooms
         </Offcanvas.Title>
       </Offcanvas.Header>

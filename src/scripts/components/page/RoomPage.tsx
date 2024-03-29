@@ -13,7 +13,8 @@ import { addMessage } from "../../events/message"
 import { leaveRoom } from "../../events/room"
 import type { 
   Room,
-  StateSetter 
+  StateSetter,
+  MessageValidationErrorObject 
 } from "../../utils/types"
 
 
@@ -30,6 +31,12 @@ function RoomPage() {
   const { setError } = useContext(ErrorContext)
   const { roomId } = useParams()
   const [prevRoomId, setPrevRoomId] = useState<string | undefined>(undefined)
+  const [
+    validationErrors, 
+    setValidationErrors
+  ] = useState<MessageValidationErrorObject>({
+    content: []
+  })
 
   const {
     joinedRooms,
@@ -57,6 +64,16 @@ function RoomPage() {
     return () => clearTimeout(timeoutId);
   }, [roomId])
 
+  useEffect(() => {
+    if (validationErrors.content.length) {
+      window.scroll({
+        top: document.body.offsetHeight,
+        left: 0, 
+        behavior: 'smooth',
+      });
+    }
+  }, [validationErrors])
+
   if (
     joinedRoomIndex === null
     || joinedRooms[joinedRoomIndex]._id !== roomId
@@ -79,7 +96,9 @@ function RoomPage() {
       <>
         <div className="mb-4">
           <div className="d-flex justify-content-between">
-            <h1 className="text-capitalize text-truncate">{topic}</h1>
+            <h1 className="text-capitalize text-truncate">
+              {topic}
+            </h1>
             <Link to="/">
               <Button 
                 variant="primary"
@@ -115,7 +134,7 @@ function RoomPage() {
           })
         }
         </div>
-        <Form onSubmit={
+        <Form noValidate onSubmit={
           (event) => addMessage(
             event,
             room,
@@ -123,16 +142,20 @@ function RoomPage() {
             joinedRoomIndex,
             setJoinedRooms,
             setJoinedRoomIndex,
-            setError
+            setError,
+            setValidationErrors
           )
         }>
           <Form.Group>
-            <InputGroup>
+            <InputGroup hasValidation>
               <Form.Control
                 type="text"
                 name="content"
                 aria-label="Message"
                 required
+                isInvalid={
+                  Boolean(validationErrors.content.length)
+                }
               />
               <Button 
                 type="submit"
@@ -140,6 +163,18 @@ function RoomPage() {
               >
                   Send
               </Button>
+              {
+                validationErrors.content.map((msg) => {
+                  return (
+                    <Form.Control.Feedback 
+                      key={msg}
+                      type='invalid'
+                    >
+                      {msg}
+                    </Form.Control.Feedback>
+                  )
+                })
+              }
             </InputGroup>
           </Form.Group>
         </Form>

@@ -26,6 +26,8 @@ function IndexPage() {
   } = useOutletContext<IndexPageProps>()
     
   return (
+    <>
+    <h1 className="mb-4">Join Room</h1>
     <RoomGrid 
       rooms={openRooms}
       selectRoom={
@@ -40,6 +42,7 @@ function IndexPage() {
         )
       }
     />
+    </>
   )
 }
   

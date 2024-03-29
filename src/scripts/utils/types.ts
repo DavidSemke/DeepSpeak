@@ -34,3 +34,7 @@ export type RoomValidationErrorObject = {
     topic: string[]
     maxUserCount: string[]
 }
+
+export type MessageValidationErrorObject = {
+    content: string[]
+}
