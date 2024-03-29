@@ -131,8 +131,11 @@ export async function leaveRoom(
       return
     }
 
+    let updatedRoom: Room
+
     try {
       await deleteUser(roomToLeave._id, value.user)
+      updatedRoom = await getRoom(roomToLeave._id)
     }
     catch(error) {
       if (
@@ -153,9 +156,9 @@ export async function leaveRoom(
     
     setJoinedRooms(
       joinedRooms.filter((joinedRoom) => {
-        joinedRoom._id !== roomToLeave._id
+        joinedRoom._id !== updatedRoom._id
       })
     )
-    setOpenRooms([...openRooms, roomToLeave])
+    setOpenRooms([...openRooms, updatedRoom])
     setJoinedRoomIndex(null)
 }
