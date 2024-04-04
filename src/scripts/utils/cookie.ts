@@ -46,7 +46,7 @@ export function getJoinedRoomValue(
         return null
     }
 
-    const joinedRoomDict = JSON.parse(joinedRoomsJson)
+    const joinedRoomDict: JoinedRoomDict = JSON.parse(joinedRoomsJson)
     const value = joinedRoomDict[roomId]
     
     if (value === undefined) {
@@ -54,4 +54,14 @@ export function getJoinedRoomValue(
     }
 
     return value
+}
+
+export function getJoinedRoomKeys(): string[] | null {
+    const joinedRoomsJson = Cookies.get('joinedRooms')
+
+    if (joinedRoomsJson === undefined) {
+        return null
+    }
+
+    return Object.keys(JSON.parse(joinedRoomsJson))
 }

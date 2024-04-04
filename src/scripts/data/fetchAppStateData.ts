@@ -2,6 +2,7 @@ import Cookies from 'js-cookie'
 import { getManyRooms, getRoom } from './fetchRoom'
 import type { Room, JoinedRoomDict } from '../utils/types'
 import { getMessage } from './fetchMessage'
+import { ResponseError } from '../errors/responseError'
 
 
 export async function fetchJoinedRooms(): Promise<Room[]> {
@@ -13,11 +14,24 @@ export async function fetchJoinedRooms(): Promise<Room[]> {
     }
 
     const results = await Promise.all(
-        Object.keys(joinedRoomDict)
-          .map((key) => {
-            return getRoom(key)
-          })
+      Object.keys(joinedRoomDict)
+        .map(async (key) => {
+          try {
+            return await getRoom(key)
+          }
+          catch(error) {
+            if (
+              error instanceof ResponseError
+              && error.status === 404
+            ) {
+              return null
+            }
+
+            throw error
+          }
+        })
     )
+    
     const joinedRooms: Room[] = results.filter(
       (room): room is Room => room !== null
     )

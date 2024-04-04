@@ -5,11 +5,10 @@ import {
     fetchGet
 } from "./fetchAny";
 import type { 
-    Message, JoinedRoomDictValue 
+    Message
 } from "../utils/types";
 import { authFailError, resource404Error } from "../errors/errorFactory";
 import { 
-    insertJoinedRoomKey, 
     deleteJoinedRoomKey,
     getJoinedRoomValue
 } from "../utils/cookie";
@@ -68,6 +67,9 @@ export async function postMessage(
     if (status === 404) {
         deleteJoinedRoomKey(roomId)
         throw resource404Error('room')
+    }
+    else if (status === 401 || status === 403) {
+        deleteJoinedRoomKey(roomId)
     }
     
     throw fetchArrayValidationError(json)

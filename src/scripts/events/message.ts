@@ -7,11 +7,12 @@ import type {
 } from "../utils/types"
 import { ResponseError } from "../errors/responseError"
 import { ArrayValidationError } from "../errors/validationError"
+import { SocketManager } from "../socket/manager"
 
 
 export async function addMessage(
     event: React.SyntheticEvent<HTMLFormElement>,
-    roomToUpdate: Room,
+    roomToMessage: Room,
     joinedRooms: Room[],
     joinedRoomIndex: number | null,
     setJoinedRooms: StateSetter<Room[] | null>,
@@ -21,11 +22,9 @@ export async function addMessage(
 ) {
     event.preventDefault()
     const form = event.currentTarget
-    let updatedRoom: Room
 
     try {
-      await postMessage(roomToUpdate._id, new FormData(form))
-      updatedRoom = await getRoom(roomToUpdate._id)
+      await postMessage(roomToMessage._id, new FormData(form))
     }
     catch(error) {
       if (error instanceof ArrayValidationError) {
@@ -50,23 +49,23 @@ export async function addMessage(
       ) {
         setJoinedRooms(
           joinedRooms.filter((joinedRoom) => {
-            joinedRoom._id !== roomToUpdate._id
+            joinedRoom._id !== roomToMessage._id
           })
         )
         setJoinedRoomIndex(null)
+
+        SocketManager.socketEmit(
+          'leave-room', 
+          { roomId: roomToMessage._id, update: false }
+        )
       }
       
       setError(error)
       return
     }
 
-    setJoinedRooms(
-      joinedRooms.map((room, index) => {
-        if (index === joinedRoomIndex) {
-          return (updatedRoom as Room)
-        }
-
-        return room
-      })
+    SocketManager.socketEmit(
+      'post-message', 
+      { roomId: roomToMessage._id }
     )
   }

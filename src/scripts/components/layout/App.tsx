@@ -12,6 +12,7 @@ import {
 import Sidebar from './Sidebar'
 import LoadingVisual from '../loading/LoadingVisual'
 import { ErrorContext } from '../../utils/reactContext'
+import { SocketManager } from '../../socket/manager'
 import type { Room } from '../../utils/types'
 
 
@@ -35,21 +36,25 @@ function App() {
     let isMounted = true
 
     async function fetchData() {
-      const joined = await fetchJoinedRooms()
-      const open = await fetchOpenRooms(joined)
-
-      if (isMounted) {
-        setJoinedRooms(joined)
-        setOpenRooms(open)
+      try {
+        const joined = await fetchJoinedRooms()
+        const open = await fetchOpenRooms(joined)
+  
+        if (isMounted) {
+          setJoinedRooms(joined)
+          setOpenRooms(open)
+        }
+      }
+      catch(error) {
+        setError(error)
       }
     }
 
-    try {
-      fetchData()
-    }
-    catch(error) {
-      setError(error)
-    }
+    fetchData()
+    SocketManager.socketDeploy(
+      setJoinedRooms,
+      setOpenRooms
+    )
 
     return () => {
         isMounted = false

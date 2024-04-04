@@ -2,6 +2,7 @@ import {
     ArrayValidationError, 
     isValidationObject,
 } from "../errors/validationError";
+import consts from "./constants";
 
 
 type JsonObject = { [key: string]: unknown }
@@ -9,9 +10,6 @@ type FetchReturn = {
     status: number,
     json: JsonObject
 }
-
-// const baseUrl = 'https://deepspeakapi.fly.dev'
-const baseUrl = 'http://localhost:3000'
 
 export async function fetchMany( 
     pathToCollection: string, 
@@ -21,7 +19,7 @@ export async function fetchMany(
     offset=0,
     populate: string | undefined = undefined
 ): Promise<FetchReturn> {
-    let url = `${baseUrl}${pathToCollection}?`
+    let url = `${consts.SERVER_URL}${pathToCollection}?`
         + `order-by=${orderBy}`
         + `&order=${order}`
         + `&limit=${limit}`
@@ -43,7 +41,7 @@ export async function fetchGet(
     documentId: string
 ): Promise<FetchReturn> {
     const res = await fetch(
-        `${baseUrl}${pathToCollection}/${documentId}`, 
+        `${consts.SERVER_URL}${pathToCollection}/${documentId}`, 
         { mode: "cors" }
     );
     const json = await res.json()
@@ -58,7 +56,7 @@ export async function fetchPost(
     headers: { [key: string]: string } = {}
 ): Promise<FetchReturn> {
     const res = await fetch(
-        `${baseUrl}${pathToCollection}`, 
+        `${consts.SERVER_URL}${pathToCollection}`, 
         { 
             mode: "cors",
             method: 'POST',
@@ -78,7 +76,7 @@ export async function fetchDelete(
     headers: { [key: string]: string } = {}
 ): Promise<FetchReturn | null> {
     const res = await fetch(
-        `${baseUrl}${pathToCollection}/${user}`,
+        `${consts.SERVER_URL}${pathToCollection}/${user}`,
         { 
             mode: "cors",
             method: 'DELETE',

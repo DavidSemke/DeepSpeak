@@ -1,7 +1,7 @@
 import { NavigateFunction } from "react-router-dom"
 import { generateUser } from "../utils/randomString"
 import { postUser, deleteUser } from "../data/fetchUser"
-import { getRoom, postRoom } from "../data/fetchRoom"
+import { postRoom } from "../data/fetchRoom"
 import { ArrayValidationError } from "../errors/validationError"
 import { authFailError } from "../errors/errorFactory"
 import type { 
@@ -11,10 +11,11 @@ import type {
 } from "../utils/types"
 import { getJoinedRoomValue } from "../utils/cookie"
 import { ResponseError } from "../errors/responseError"
+import { SocketManager } from "../socket/manager"
 
 
 export async function joinRoom(
-    roomToSelect: Room,
+    roomToJoin: Room,
     joinedRooms: Room[],
     openRooms: Room[],
     setJoinedRooms: StateSetter<Room[] | null>,
@@ -28,32 +29,34 @@ export async function joinRoom(
     do {
       user = generateUser()
     } while (
-      roomToSelect.users.includes(user)
-      || roomToSelect.deleted_users.includes(user)
+      roomToJoin.users.includes(user)
+      || roomToJoin.deleted_users.includes(user)
     )
-
-    let updatedRoom: Room
 
     try {
       // Add user to room
       const formData = new FormData()
       formData.append('user', user)
-      await postUser(roomToSelect._id, formData)
-      updatedRoom = await getRoom(roomToSelect._id)
+      await postUser(roomToJoin._id, formData)
     }
     catch(error) {
       setError(error)
       return
     }
 
-    setJoinedRooms([...joinedRooms, updatedRoom])
+    setJoinedRooms([...joinedRooms, roomToJoin])
     // If room is newly created, it will not be in openRooms
     setOpenRooms(
       openRooms.filter((openRoom) => {
-        return openRoom._id !== (updatedRoom as Room)._id
+        return openRoom._id !== roomToJoin._id
       }
     ))
     setJoinedRoomIndex(joinedRooms.length)
+
+    SocketManager.socketEmit(
+      'join-room', 
+      { roomId: roomToJoin._id, update: true }
+    )
 }
 
 // Create a room and join it
@@ -131,11 +134,8 @@ export async function leaveRoom(
       return
     }
 
-    let updatedRoom: Room
-
     try {
       await deleteUser(roomToLeave._id, value.user)
-      updatedRoom = await getRoom(roomToLeave._id)
     }
     catch(error) {
       if (
@@ -148,6 +148,11 @@ export async function leaveRoom(
           })
         )
         setJoinedRoomIndex(null)
+
+        SocketManager.socketEmit(
+          'leave-room', 
+          { roomId: roomToLeave._id, update: false }
+        )
       }
 
       setError(error)
@@ -156,9 +161,14 @@ export async function leaveRoom(
     
     setJoinedRooms(
       joinedRooms.filter((joinedRoom) => {
-        joinedRoom._id !== updatedRoom._id
+        joinedRoom._id !== roomToLeave._id
       })
     )
-    setOpenRooms([...openRooms, updatedRoom])
+    setOpenRooms([...openRooms, roomToLeave])
     setJoinedRoomIndex(null)
+
+    SocketManager.socketEmit(
+      'leave-room', 
+      { roomId: roomToLeave._id, update: true }
+    )
 }
