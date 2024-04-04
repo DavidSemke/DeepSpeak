@@ -78,6 +78,7 @@ function App() {
     >
       <Navbar
         expand={false}
+        sticky='top'
         className='bg-body-tertiary'
       >
         <Container fluid>

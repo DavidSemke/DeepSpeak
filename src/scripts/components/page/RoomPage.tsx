@@ -3,7 +3,7 @@ import {
   useOutletContext, 
   useParams 
 } from "react-router-dom"
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import MessageCard from "../card/MessageCard"
 import LoadingVisual from "../loading/LoadingVisual"
 import { wordTimestamp } from "../../utils/dateFormat"
@@ -37,6 +37,7 @@ function RoomPage() {
   ] = useState<MessageValidationErrorObject>({
     content: []
   })
+  const latestMessageId = useRef<string | null>(null)
 
   const {
     joinedRooms,
@@ -65,14 +66,38 @@ function RoomPage() {
   }, [roomId])
 
   useEffect(() => {
-    if (validationErrors.content.length) {
-      window.scroll({
-        top: document.body.offsetHeight,
-        left: 0, 
-        behavior: 'smooth',
-      });
+    // The first two return-checks determine if the page 
+    // is still loading
+    if (joinedRoomIndex === null) {
+      return
     }
-  }, [validationErrors])
+
+    const room = joinedRooms[joinedRoomIndex]
+
+    if (room._id !== roomId) {
+      return
+    }
+
+    const { messages } = room
+
+    if (!messages.length) {
+      return
+    }
+
+    const id = messages[messages.length-1]._id
+
+    if (latestMessageId.current !== id) {
+      latestMessageId.current = id
+    }
+  }, [joinedRooms])
+
+  useEffect(() => {
+    window.scroll({
+      top: document.body.offsetHeight,
+      left: 0, 
+      behavior: 'smooth',
+    });
+  }, [validationErrors, latestMessageId.current])
 
   if (
     joinedRoomIndex === null
