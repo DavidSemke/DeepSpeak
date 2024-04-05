@@ -3,7 +3,7 @@ import {
   useOutletContext, 
   useParams 
 } from "react-router-dom"
-import { useContext, useEffect, useRef, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import MessageCard from "../card/MessageCard"
 import LoadingVisual from "../loading/LoadingVisual"
 import { wordTimestamp } from "../../utils/dateFormat"
@@ -37,7 +37,6 @@ function RoomPage() {
   ] = useState<MessageValidationErrorObject>({
     content: []
   })
-  const latestMessageId = useRef<string | null>(null)
 
   const {
     joinedRooms,
@@ -66,48 +65,29 @@ function RoomPage() {
   }, [roomId])
 
   useEffect(() => {
-    // The first two return-checks determine if the page 
-    // is still loading
-    if (joinedRoomIndex === null) {
-      return
-    }
-
-    const room = joinedRooms[joinedRoomIndex]
-
-    if (room._id !== roomId) {
-      return
-    }
-
-    const { messages } = room
-
-    if (!messages.length) {
-      return
-    }
-
-    const id = messages[messages.length-1]._id
-
-    if (latestMessageId.current !== id) {
-      latestMessageId.current = id
-    }
-  }, [joinedRooms])
-
-  useEffect(() => {
     window.scroll({
       top: document.body.offsetHeight,
       left: 0, 
       behavior: 'smooth',
     });
-  }, [validationErrors, latestMessageId.current])
+  }, [
+    validationErrors, 
+    joinedRooms[joinedRoomIndex || 0]?.messages
+  ])
 
-  if (
+  const loadingRoom = (
     joinedRoomIndex === null
     || joinedRooms[joinedRoomIndex]._id !== roomId
-  ) {
-    if (prevRoomId === roomId) {
-      throw new Error('Could not join room')
-    }
-    // Assume that joinedRoomIndex is in the process of being set
-    // If this assumption is false, error is thrown after timeout
+  )
+
+  // Assume that joinedRoomIndex is in the process of being set
+  // If this assumption is false, error is thrown after timeout
+  // prevRoomId === roomId after timeout
+  if (loadingRoom && prevRoomId === roomId) {
+    throw new Error('Could not join room')
+  }
+  
+  if (loadingRoom) {
     return (
       <LoadingVisual />
     )
@@ -115,6 +95,17 @@ function RoomPage() {
 
   const room = joinedRooms[joinedRoomIndex]
   const {topic, create_date, users, messages} = room
+
+  // If messages array contains string id's:
+  // 1 - Room was just joined
+  // 2 - Room update is occurring, which will replace
+  // the string id's with message objects
+  if (messages.length && typeof messages[0] === 'string') {
+    return (
+      <LoadingVisual />
+    )
+  }
+
   const createDate = wordTimestamp(create_date)
 
   return (
@@ -164,7 +155,6 @@ function RoomPage() {
             event,
             room,
             joinedRooms,
-            joinedRoomIndex,
             setJoinedRooms,
             setJoinedRoomIndex,
             setError,

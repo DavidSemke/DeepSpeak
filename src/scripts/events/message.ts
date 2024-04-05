@@ -1,4 +1,3 @@
-import { getRoom } from "../data/fetchRoom"
 import { postMessage } from "../data/fetchMessage"
 import type { 
   MessageValidationErrorObject,
@@ -14,7 +13,6 @@ export async function addMessage(
     event: React.SyntheticEvent<HTMLFormElement>,
     roomToMessage: Room,
     joinedRooms: Room[],
-    joinedRoomIndex: number | null,
     setJoinedRooms: StateSetter<Room[] | null>,
     setJoinedRoomIndex: StateSetter<number | null>,
     setError: StateSetter<unknown | null>,
