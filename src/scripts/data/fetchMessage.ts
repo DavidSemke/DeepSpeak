@@ -16,18 +16,27 @@ import {
 
 export async function getManyMessages(
     roomId: string,
-    orderBy='create_date', 
-    order='asc', 
-    limit=100, 
-    offset=0
+    orderBy='topic', 
+    order: 'asc' | 'desc' = 'asc', 
+    limit: number | null = null, 
+    offset: number | null = null,
+    ids: string[] | null = null
 ): Promise<Message[]> {
-    const {status, json} = await fetchMany(
+    const fetch = await fetchMany(
         `/rooms/${roomId}/messages`,
         orderBy, 
         order, 
         limit, 
-        offset
+        offset,
+        null,
+        ids
     )
+    
+    if (fetch === null) {
+        return [] as Message[]
+    }
+
+    const {status, json} = fetch
 
     if ('message_collection' in json) {
         return json.message_collection as Message[]

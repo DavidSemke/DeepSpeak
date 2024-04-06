@@ -11,17 +11,27 @@ import { resource404Error } from "../errors/errorFactory";
 
 export async function getManyRooms(
     orderBy='topic', 
-    order='asc', 
-    limit=12, 
-    offset=0
+    order: 'asc' | 'desc' = 'asc', 
+    limit: number | null = null, 
+    offset: number | null = null,
+    populate: string | null = null,
+    ids: string[] | null = null
 ): Promise<Room[]> {
-    const { json } = await fetchMany(
+    const fetch = await fetchMany(
         '/rooms',
         orderBy, 
         order, 
         limit, 
-        offset
+        offset,
+        populate,
+        ids
     )
+
+    if (fetch === null) {
+        return [] as Room[]
+    }
+
+    const {json} = fetch
 
     if ('room_collection' in json) {
         return json.room_collection as Room[]

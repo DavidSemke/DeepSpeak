@@ -14,20 +14,39 @@ type FetchReturn = {
 export async function fetchMany( 
     pathToCollection: string, 
     orderBy='topic', 
-    order='asc', 
-    limit=10, 
-    offset=0,
-    populate: string | undefined = undefined
-): Promise<FetchReturn> {
-    let url = `${consts.SERVER_URL}${pathToCollection}?`
-        + `order-by=${orderBy}`
-        + `&order=${order}`
-        + `&limit=${limit}`
-        + `&offset=${offset}`
-    
-    if (populate !== undefined) {
-        url += `&populate=${populate}` 
-    } 
+    order: 'asc' | 'desc' = 'asc', 
+    limit: number | null = null, 
+    offset: number | null = null,
+    populate: string | null = null,
+    ids: string[] | null = null
+): Promise<FetchReturn | null> {
+    // If ids is not null, only those rooms having the given ids
+    // should be fetched
+    // If ids is an empty array, no need for a request
+    if (ids !== null && !ids.length) {
+        return null
+    }
+
+    let url = consts.SERVER_URL + pathToCollection
+    const queryParamValuePairs = [
+        ['order-by', orderBy],
+        ['order', order],
+        ['limit', limit],
+        ['offset', offset],
+        ['populate', populate],
+        ['ids', ids?.join(',')],
+    ]
+    const querySegments: string[] = []
+
+    for (const [param, value] of queryParamValuePairs) {
+        if (value !== null && value !== undefined) {
+            querySegments.push(`${param}=${value}`) 
+        }
+    }
+
+    if (querySegments.length) {
+        url += '?' + querySegments.join('&')
+    }
 
     const res = await fetch(url, { mode: "cors" });
     const json = await res.json()
