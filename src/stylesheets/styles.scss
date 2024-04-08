@@ -1,5 +1,10 @@
 @import "bootstrap/scss/bootstrap";
 
+h1 {
+    overflow-wrap: break-word;
+    // white-space: normal;
+}
+
 .button-icon {
     width: 1rem;
     height: 1rem;

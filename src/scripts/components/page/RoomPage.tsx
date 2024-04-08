@@ -145,8 +145,8 @@ function RoomPage() {
   return (
       <>
         <div className="mb-4">
-          <div className="d-flex justify-content-between">
-            <h1 className="text-capitalize">
+          <div className="d-flex justify-content-between gap-3">
+            <h1 className="text-capitalize text-break">
               {topic}
             </h1>
             <Link to="/">
@@ -168,7 +168,6 @@ function RoomPage() {
               </Button>
             </Link>
           </div>
-          
           <div className="text-muted">Created on {createDate}</div>
           <div className="text-muted">Users: {users.join(', ')}</div>
         </div>
