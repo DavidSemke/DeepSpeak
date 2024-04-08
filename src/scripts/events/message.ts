@@ -47,7 +47,7 @@ export async function addMessage(
       ) {
         setJoinedRooms(
           joinedRooms.filter((joinedRoom) => {
-            joinedRoom._id !== roomToMessage._id
+            return joinedRoom._id !== roomToMessage._id
           })
         )
         setJoinedRoomIndex(null)

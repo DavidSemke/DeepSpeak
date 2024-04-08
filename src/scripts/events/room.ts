@@ -144,7 +144,7 @@ export async function leaveRoom(
       ) {
         setJoinedRooms(
           joinedRooms.filter((joinedRoom) => {
-            joinedRoom._id !== roomToLeave._id
+            return joinedRoom._id !== roomToLeave._id
           })
         )
         setJoinedRoomIndex(null)
@@ -161,7 +161,7 @@ export async function leaveRoom(
     
     setJoinedRooms(
       joinedRooms.filter((joinedRoom) => {
-        joinedRoom._id !== roomToLeave._id
+        return joinedRoom._id !== roomToLeave._id
       })
     )
     setOpenRooms([...openRooms, roomToLeave])

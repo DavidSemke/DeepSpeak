@@ -33,7 +33,7 @@ export async function getManyRooms(
 
     const {json} = fetch
 
-    if ('room_collection' in json) {
+    if ('room_collection' in json) {        
         return json.room_collection as Room[]
     }
     

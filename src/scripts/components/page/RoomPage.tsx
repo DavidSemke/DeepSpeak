@@ -3,7 +3,12 @@ import {
   useOutletContext, 
   useParams 
 } from "react-router-dom"
-import { useContext, useEffect, useState } from "react"
+import { 
+  useContext, 
+  useEffect, 
+  useRef, 
+  useState 
+} from "react"
 import MessageCard from "../card/MessageCard"
 import LoadingVisual from "../loading/LoadingVisual"
 import { wordTimestamp } from "../../utils/dateFormat"
@@ -37,6 +42,7 @@ function RoomPage() {
   ] = useState<MessageValidationErrorObject>({
     content: []
   })
+  const latestMessageId = useRef<string | null>(null)
 
   const {
     joinedRooms,
@@ -53,6 +59,12 @@ function RoomPage() {
 
       if (room._id === roomId) {
         setJoinedRoomIndex(i)
+        const { messages } = joinedRooms[i]
+
+        if (messages.length) {
+          latestMessageId.current = messages[messages.length-1]._id
+        }
+
         break
       }
     }
@@ -64,21 +76,43 @@ function RoomPage() {
     return () => clearTimeout(timeoutId);
   }, [roomId])
 
-  useEffect(() => {
-    window.scroll({
-      top: document.body.offsetHeight,
-      left: 0, 
-      behavior: 'smooth',
-    });
-  }, [
-    validationErrors, 
-    joinedRooms[joinedRoomIndex || 0]?.messages
-  ])
-
   const loadingRoom = (
     joinedRoomIndex === null
     || joinedRooms[joinedRoomIndex]._id !== roomId
   )
+
+  useEffect(() => {
+    function shouldScrollWindow(): boolean {
+      if (loadingRoom) {
+        return false
+      }
+
+      if (validationErrors.content.length) {
+        return true
+      }
+
+      const { messages } = joinedRooms[joinedRoomIndex]
+
+      if (messages.length) {
+        const latestMessage = messages[messages.length-1]
+  
+        if (latestMessageId.current !== latestMessage._id) {
+          latestMessageId.current = latestMessage._id
+          return true
+        }
+      }
+  
+      return false
+    }
+
+    if (shouldScrollWindow()) {
+      window.scrollTo({
+        top: document.body.offsetHeight,
+        left: 0, 
+        behavior: 'smooth',
+      });
+    }
+  }, [validationErrors, joinedRooms])
 
   // Assume that joinedRoomIndex is in the process of being set
   // If this assumption is false, error is thrown after timeout

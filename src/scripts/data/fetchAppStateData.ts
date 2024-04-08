@@ -42,22 +42,14 @@ export async function fetchOpenRooms(
   if (joinedRooms !== null) {
     const joinedRoomIds = joinedRooms.map((room) => room._id)
     const isNotJoined = (openRoom: Room) => {
-      if (joinedRoomIds.includes(openRoom._id)) {
-        return false
-      }
-
-      return true
+      return !joinedRoomIds.includes(openRoom._id)
     }
     filters.push(isNotJoined)
   }
 
   // Filter to remove rooms that are full
   const isNotFull = (openRoom: Room) => {
-    if (openRoom.users.length === openRoom.max_user_count) {
-      return false
-    }
-
-    return true
+    return openRoom.users.length !== openRoom.max_user_count
   }
   filters.push(isNotFull)
 
