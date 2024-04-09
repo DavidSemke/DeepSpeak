@@ -8,8 +8,8 @@ import RoomPage from "./components/page/RoomPage.jsx"
 import CreateRoomPage from "./components/page/CreateRoomPage.jsx"
 import "../stylesheets/styles.scss"
 
-const router = createBrowserRouter([
-  {
+const router = createBrowserRouter(
+  [{
     path: "/",
     element: <App />,
     errorElement: <ErrorPage />,
@@ -27,8 +27,11 @@ const router = createBrowserRouter([
         element: <RoomPage />,
       },
     ],
-  },
-])
+  }],
+  {
+    basename: '/DeepSpeak'
+  }
+)
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
