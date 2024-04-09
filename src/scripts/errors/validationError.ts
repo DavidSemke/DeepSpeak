@@ -1,33 +1,29 @@
 type ValidationObject = {
-    type: string
-    value: string 
-    msg: string
-    path: string
-    location: string
+  type: string
+  value: string
+  msg: string
+  path: string
+  location: string
 }
 
 export class ArrayValidationError extends Error {
-    validationObjects: ValidationObject[]
+  validationObjects: ValidationObject[]
 
-    constructor(
-        validationObjects: ValidationObject[]
-    ) {
-        super('Validation failed')
-        this.validationObjects = validationObjects
-        this.name = 'ArrayValidationError'
-    }
+  constructor(validationObjects: ValidationObject[]) {
+    super("Validation failed")
+    this.validationObjects = validationObjects
+    this.name = "ArrayValidationError"
+  }
 }
 
-export function isValidationObject(
-    obj: unknown
-): obj is ValidationObject {
-    return (
-        typeof obj === 'object'
-        && obj !== null
-        && 'type' in obj
-        && 'value' in obj
-        &&'msg' in obj 
-        && 'path' in obj 
-        && 'location' in obj
-    );
+export function isValidationObject(obj: unknown): obj is ValidationObject {
+  return (
+    typeof obj === "object" &&
+    obj !== null &&
+    "type" in obj &&
+    "value" in obj &&
+    "msg" in obj &&
+    "path" in obj &&
+    "location" in obj
+  )
 }

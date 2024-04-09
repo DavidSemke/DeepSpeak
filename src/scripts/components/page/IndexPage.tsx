@@ -5,12 +5,11 @@ import { ErrorContext } from "../../utils/reactContext"
 import { joinRoom } from "../../events/room"
 import type { Room, StateSetter } from "../../utils/types"
 
-
 type IndexPageProps = {
-  joinedRooms: Room[],
-  openRooms: Room[],
-  setJoinedRoomIndex: StateSetter<number | null>,
-  setJoinedRooms: StateSetter<Room[] | null>,
+  joinedRooms: Room[]
+  openRooms: Room[]
+  setJoinedRoomIndex: StateSetter<number | null>
+  setJoinedRooms: StateSetter<Room[] | null>
   setOpenRooms: StateSetter<Room[] | null>
 }
 
@@ -22,29 +21,28 @@ function IndexPage() {
     openRooms,
     setJoinedRoomIndex,
     setJoinedRooms,
-    setOpenRooms 
+    setOpenRooms,
   } = useOutletContext<IndexPageProps>()
-    
+
   return (
     <>
-    <h1 className="mb-4">Join Room</h1>
-    <RoomGrid 
-      rooms={openRooms}
-      selectRoom={
-        (room) => joinRoom(
-          room,
-          joinedRooms,
-          openRooms,
-          setJoinedRooms,
-          setOpenRooms,
-          setJoinedRoomIndex,
-          setError
-        )
-      }
-    />
+      <h1 className="mb-4">Join Room</h1>
+      <RoomGrid
+        rooms={openRooms}
+        selectRoom={(room) =>
+          joinRoom(
+            room,
+            joinedRooms,
+            openRooms,
+            setJoinedRooms,
+            setOpenRooms,
+            setJoinedRoomIndex,
+            setError,
+          )
+        }
+      />
     </>
   )
 }
-  
-  
+
 export default IndexPage

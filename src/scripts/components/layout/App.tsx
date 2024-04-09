@@ -1,35 +1,19 @@
-import { useState } from 'react'
-import { useEffect } from 'react'
-import { Outlet } from 'react-router-dom'
-import { 
-  Container, 
-  Navbar 
-} from 'react-bootstrap'
-import { 
-  fetchJoinedRooms, 
-  fetchOpenRooms 
-} from '../../data/fetchAppStateData'
-import Sidebar from './Sidebar'
-import LoadingVisual from '../loading/LoadingVisual'
-import { ErrorContext } from '../../utils/reactContext'
-import { SocketManager } from '../../socket/manager'
-import type { Room } from '../../utils/types'
-
+import { useState } from "react"
+import { useEffect } from "react"
+import { Outlet } from "react-router-dom"
+import { Container, Navbar } from "react-bootstrap"
+import { fetchJoinedRooms, fetchOpenRooms } from "../../data/fetchAppStateData"
+import Sidebar from "./Sidebar"
+import LoadingVisual from "../loading/LoadingVisual"
+import { ErrorContext } from "../../utils/reactContext"
+import { SocketManager } from "../../socket/manager"
+import type { Room } from "../../utils/types"
 
 function App() {
   const [showSidebar, setShowSidebar] = useState(false)
-  const [
-    joinedRoomIndex, 
-    setJoinedRoomIndex
-  ] = useState<number | null>(null)
-  const [
-    joinedRooms, 
-    setJoinedRooms
-  ] = useState<Room[] | null>(null)
-  const [
-    openRooms, 
-    setOpenRooms
-  ] = useState<Room[] | null>(null)
+  const [joinedRoomIndex, setJoinedRoomIndex] = useState<number | null>(null)
+  const [joinedRooms, setJoinedRooms] = useState<Room[] | null>(null)
+  const [openRooms, setOpenRooms] = useState<Room[] | null>(null)
   const [error, setError] = useState<unknown | null>(null)
 
   useEffect(() => {
@@ -39,25 +23,21 @@ function App() {
       try {
         const joined = await fetchJoinedRooms()
         const open = await fetchOpenRooms(joined)
-  
+
         if (isMounted) {
           setJoinedRooms(joined)
           setOpenRooms(open)
         }
-      }
-      catch(error) {
+      } catch (error) {
         setError(error)
       }
     }
 
     fetchData()
-    SocketManager.socketDeploy(
-      setJoinedRooms,
-      setOpenRooms
-    )
+    SocketManager.socketDeploy(setJoinedRooms, setOpenRooms)
 
     return () => {
-        isMounted = false
+      isMounted = false
     }
   }, [])
 
@@ -67,25 +47,17 @@ function App() {
   }
 
   if (joinedRooms === null || openRooms === null) {
-    return (
-      <LoadingVisual />
-    )
+    return <LoadingVisual />
   }
-  
+
   return (
-    <ErrorContext.Provider
-      value={{ setError }}
-    >
-      <Navbar
-        expand={false}
-        sticky='top'
-        className='bg-body-tertiary'
-      >
+    <ErrorContext.Provider value={{ setError }}>
+      <Navbar expand={false} sticky="top" className="bg-body-tertiary">
         <Container fluid>
           <Navbar.Brand href="/">DeepSpeak</Navbar.Brand>
-          <Navbar.Toggle 
-            aria-controls='left-sidebar' 
-            onClick={() => setShowSidebar(true)} 
+          <Navbar.Toggle
+            aria-controls="left-sidebar"
+            onClick={() => setShowSidebar(true)}
           />
           <Sidebar
             show={showSidebar}
@@ -96,20 +68,20 @@ function App() {
           />
         </Container>
       </Navbar>
-      <Container className='p-3'>
-        <Outlet context={{
+      <Container className="p-3">
+        <Outlet
+          context={{
             joinedRooms,
             openRooms,
             joinedRoomIndex,
             setJoinedRooms,
             setOpenRooms,
-            setJoinedRoomIndex
+            setJoinedRoomIndex,
           }}
         />
       </Container>
     </ErrorContext.Provider>
   )
 }
-
 
 export default App

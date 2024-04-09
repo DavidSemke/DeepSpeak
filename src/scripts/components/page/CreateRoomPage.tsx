@@ -3,30 +3,27 @@ import { useNavigate, useOutletContext } from "react-router-dom"
 import { Button, Form } from "react-bootstrap"
 import { ErrorContext } from "../../utils/reactContext"
 import { addRoom } from "../../events/room"
-import type { 
-  Room, 
-  StateSetter, 
-  RoomValidationErrorObject 
+import type {
+  Room,
+  StateSetter,
+  RoomValidationErrorObject,
 } from "../../utils/types"
 
-
 type CreateRoomPageProps = {
-  joinedRooms: Room[],
-  openRooms: Room[],
-  setJoinedRooms: StateSetter<Room[] | null>,
+  joinedRooms: Room[]
+  openRooms: Room[]
+  setJoinedRooms: StateSetter<Room[] | null>
   setOpenRooms: StateSetter<Room[] | null>
-  setJoinedRoomIndex: StateSetter<number | null>,
+  setJoinedRoomIndex: StateSetter<number | null>
 }
 
 function CreateRoomPage() {
   const { setError } = useContext(ErrorContext)
-  const [
-    validationErrors, 
-    setValidationErrors
-  ] = useState<RoomValidationErrorObject>({
-    topic: [],
-    maxUserCount: []
-  })
+  const [validationErrors, setValidationErrors] =
+    useState<RoomValidationErrorObject>({
+      topic: [],
+      maxUserCount: [],
+    })
   const navigate = useNavigate()
 
   const {
@@ -40,8 +37,9 @@ function CreateRoomPage() {
   return (
     <>
       <h1 className="mb-4">Create Room</h1>
-      <Form noValidate onSubmit={
-        (event) => {
+      <Form
+        noValidate
+        onSubmit={(event) => {
           addRoom(
             event,
             joinedRooms,
@@ -51,74 +49,50 @@ function CreateRoomPage() {
             setJoinedRoomIndex,
             setError,
             setValidationErrors,
-            navigate
+            navigate,
           )
-        }
-      }>
-        <Form.Group 
-          controlId="topic"
-          className="mb-3"
-        >
+        }}
+      >
+        <Form.Group controlId="topic" className="mb-3">
           <Form.Label>Topic</Form.Label>
           <Form.Control
-              type="text"
-              name="topic"
-              required
-              isInvalid={
-                Boolean(validationErrors.topic.length)
-              }
+            type="text"
+            name="topic"
+            required
+            isInvalid={Boolean(validationErrors.topic.length)}
           />
-          {
-            validationErrors.topic.map((msg) => {
-              return (
-                <Form.Control.Feedback 
-                  key={msg}
-                  type='invalid'
-                >
-                  {msg}
-                </Form.Control.Feedback>
-              )
-            })
-          }
+          {validationErrors.topic.map((msg) => {
+            return (
+              <Form.Control.Feedback key={msg} type="invalid">
+                {msg}
+              </Form.Control.Feedback>
+            )
+          })}
         </Form.Group>
-        <Form.Group 
-          controlId="max-user-count"
-          className="mb-3"
-        >
+        <Form.Group controlId="max-user-count" className="mb-3">
           <Form.Label>Maximum Number of Users</Form.Label>
           <Form.Control
-              type="number"
-              name="max-user-count"
-              required
-              min={2}
-              max={10}
-              isInvalid={
-                Boolean(validationErrors.maxUserCount.length)
-              }
+            type="number"
+            name="max-user-count"
+            required
+            min={2}
+            max={10}
+            isInvalid={Boolean(validationErrors.maxUserCount.length)}
           />
-          {
-            validationErrors.maxUserCount.map((msg) => {
-              return (
-                <Form.Control.Feedback 
-                  key={msg}
-                  type='invalid'
-                >
-                  {msg}
-                </Form.Control.Feedback>
-              )
-            })
-          }
+          {validationErrors.maxUserCount.map((msg) => {
+            return (
+              <Form.Control.Feedback key={msg} type="invalid">
+                {msg}
+              </Form.Control.Feedback>
+            )
+          })}
         </Form.Group>
-        <Button 
-            type="submit"
-            variant="primary"
-        >
-            Submit
+        <Button type="submit" variant="primary">
+          Submit
         </Button>
       </Form>
     </>
   )
 }
-  
-  
+
 export default CreateRoomPage
