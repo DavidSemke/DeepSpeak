@@ -11,4 +11,4 @@ This is the frontend codebase for the DeepSpeak messaging app. Users anonymously
 - Sass
 - TypeScript
 
-[DeepSpeakApi](https://github.com/DavidSemke/DeepSpeakApi) was used as the backend for this project.
+[DeepSpeakApi](https://github.com/DavidSemke/DeepSpeakApi) is the backend for this project.
