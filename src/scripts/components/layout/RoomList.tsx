@@ -11,7 +11,7 @@ type RoomListProps = {
 
 function RoomList({ rooms, selectedIndex, setSelectedIndex }: RoomListProps) {
   return (
-    <ul className="d-flex flex-column gap-3">
+    <ul className="d-flex flex-column gap-3 align-items-center">
       {rooms.map((room, index) => {
         const isSelected = selectedIndex !== null && selectedIndex === index
 
