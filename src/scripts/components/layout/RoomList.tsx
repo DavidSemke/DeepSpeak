@@ -11,23 +11,22 @@ type RoomListProps = {
 
 function RoomList({ rooms, selectedIndex, setSelectedIndex }: RoomListProps) {
   return (
-    <ListGroup as="ul" variant="flush">
+    <ul className="d-flex flex-column gap-3">
       {rooms.map((room, index) => {
         const isSelected = selectedIndex !== null && selectedIndex === index
 
         return (
-          <ListGroupItem
+          <li
             key={room._id}
-            as="li"
             onClick={() => setSelectedIndex(index)}
           >
             <Link to={`/rooms/${room._id}`}>
               <RoomCard room={room} useVariant={isSelected} />
             </Link>
-          </ListGroupItem>
+          </li>
         )
       })}
-    </ListGroup>
+    </ul>
   )
 }
 
