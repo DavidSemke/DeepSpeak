@@ -8,6 +8,7 @@ import LoadingVisual from "../loading/LoadingVisual"
 import { ErrorContext } from "../../utils/reactContext"
 import { SocketManager } from "../../socket/manager"
 import type { Room } from "../../utils/types"
+import { Link } from "react-router-dom"
 
 function App() {
   const [showSidebar, setShowSidebar] = useState(false)
@@ -52,9 +53,9 @@ function App() {
 
   return (
     <ErrorContext.Provider value={{ setError }}>
-      <Navbar expand={false} sticky="top" className="bg-body-tertiary">
-        <Container fluid>
-          <Navbar.Brand href="/">DeepSpeak</Navbar.Brand>
+      <Navbar expand={false} sticky="top" className="bg-body-secondary">
+        <Container fluid className="d-flex justify-content-around">
+          <Navbar.Brand as={Link} to="/">DeepSpeak</Navbar.Brand>
           <Navbar.Toggle
             aria-controls="left-sidebar"
             onClick={() => setShowSidebar(true)}
